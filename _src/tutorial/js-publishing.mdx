@@ -1,0 +1,79 @@
+---
+id: js-publishing
+title: Publishing Your Plugin
+sidebar_label: Publishing Your Plugin
+---
+import useBaseUrl from '@docusaurus/useBaseUrl';
+import Link from '@docusaurus/Link';
+
+<FbInternalOnly>
+
+The process of releasing plugins is largely automated at Meta. For details, see the <Link to={useBaseUrl('/docs/extending/fb/desktop-plugin-releases')}>Desktop Plugin Releases</Link> page.
+
+</FbInternalOnly>
+
+<OssOnly>
+
+Once you're happy with your plugin and want the world to see it, you can publish it to npm.
+
+Before publishing, ensure that your plugin complies with the following rules:
+
+* The package name should start with 'flipper-plugin-'. This makes it easier to see the purpose of the package.
+* The package must include the keyword 'flipper-plugin'.
+* Source code of the plugin must be bundled by 'flipper-pkg' tool.
+
+A valid example `package.json` could look like the following:
+
+```json
+{
+  "$schema": "https://fbflipper.com/schemas/plugin-package/v2.json",
+  "name": "flipper-plugin-sea-mammals",
+  "id": "sea-mammals",
+  "version": "2.0.0",
+  "main": "dist/bundle.js",
+  "flipperBundlerEntry": "src/index.tsx",
+  "license": "MIT",
+  "keywords": ["flipper-plugin"],
+  "icon": "apps",
+  "title": "Sea Mammals",
+  "category": "Example Plugin",
+  "scripts": {
+    "prepack": "flipper-pkg lint && flipper-pkg bundle"
+  },
+  "dependencies": {
+    "flipper": "latest"
+  },
+  "devDependencies": {
+    "flipper-pkg": "latest"
+  }
+}
+```
+
+When you have confirmed that your `package.json` is correct, run `yarn publish` or `npm publish` and follow the instructions.
+
+## Installing Plugins
+
+Once your plugin is published you can find it, alongside other available Flipper plugins, by clicking on 'Manage Plugins...' in the bottom of the left sidebar and selecting the 'Install Plugins' tab.
+It may take a few moments for the search index to update and your plugin to appear.
+
+<img alt="Install plugins" src={useBaseUrl("img/install-plugins.png")} />
+
+## Native Distribution
+
+Depending on whether the client-side part of your plugin targets Android, iOS or React Native, it's recommended you use the standard package distribution mechanism for the platform.
+This may be Maven Central, JCenter or GitHub Packages for Android, CocoaPods for iOS and npm or GitHub Packages for React Native.
+
+Make sure to leave setup instructions in the README of your npm package.
+
+## Marketplace
+
+When developing plugins intended only for internal use (within certaing organisation/group), we might not want to expose those plugins to public.
+By default Flipper plugins will be published to [npmjs.com](https://www.npmjs.com). Thus anyone can try install&use this plugin.
+
+To keep plugin private, we can provide a `.tar.gz` archive with pluginc code and user can manually install the plugin.
+This is quite troublesome for most users and also does not provide a way to automatically update when new version is released.
+
+Flipper provides a marketplace feature, which does help with discovery of plugins within organisation and also keeps the plugins private.
+To read more details on how marketplace works and how it can be integrated, please read this document: [Marketplace](./marketplace.mdx).
+
+</OssOnly>

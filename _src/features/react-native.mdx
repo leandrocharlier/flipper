@@ -1,0 +1,72 @@
+---
+id: react-native
+title: React Native Support
+---
+import useBaseUrl from '@docusaurus/useBaseUrl';
+
+<img alt="React Native + React DevTools" src={useBaseUrl("img/react-native-react.png")} />
+
+Meta's React Native and Developer Tooling teams work in close collaboration to ensure Flipper offers top-notch out-of-the-box value for React Native development.
+
+:::note
+Integration between React Native and Flipper is enabled out of the box in React Native version 0.62 and higher.
+:::
+
+For the setup instructions for React Native, see the [Desktop App](../getting-started/index.mdx#setup-your-react-native-app) page.
+
+The following 37-minute video provides interesting information on 'Flipper: the extensible DevTool Platform for React Native`.
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/WltZTn3ODW4" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+<br/>
+
+## Device type: React Native
+
+In Flipper, the dedicated device type, 'React Native', connects to a locally running Metro instance to interact with your React Native app. This device is detected as soon as you fire up a Metro instance by running `yarn run ios` or `yarn run android` in your project.
+
+If Metro is connected, two new buttons appear in Flipper’s main toolbar: 'Reload' and 'Open Dev Menu': both do exactly as their name suggests. The 'React Native' device feature two plugins out of the box: 'Logs' and 'React DevTools', as shown in the following screenshot.
+
+<img alt="React Native Action Buttons and Logs" src={useBaseUrl("img/react-native-logs.png")} />
+
+The React DevTools allows you to inspect the component tree and tune the props and state of your React components.
+
+The Logs plugins allow you to search, filter and place watch expressions on your logging output. This offers a much richer way to interact with your logs compared to the terminal output of Metro!
+
+## Native plugins for React Native
+
+Beyond the React Native-specific Flipper plugins described above, with Flipper you also inherit the plugin eco-system that exists for native Android and iOS apps. This means that you are able to use plugins that are also aimed at native apps for your React Native app.
+
+Example plugins include:
+
+* Device logs
+* Device crash reporter
+* Inspecting network requests
+* Inspecting app local databases
+* Inspecting device preferences
+* Inspecting cached images
+* Inspecting native layout elements
+
+## Writing JavaScript plugins for React Native + Flipper
+
+One of the advantages of Flipper is its extensibility. Many teams across Meta already have written their own one-off plugins that help with analysing very specific use cases.
+Writing plugins for Flipper doesn't require any native code, as the Flipper SDK is exposed directly to JavaScript through the [react-native-flipper](https://www.npmjs.com/package/react-native-flipper) package.
+
+The following screenshot shows an example Flipper plugin, where a game of Tic Tac Toe uses Flipper and some emulators.
+
+<img alt="Tic Tac Toe example plugin" src={useBaseUrl("img/react-native-tictactoe.png")} />
+
+If you'd like to build a specific (or generic) extension for Flipper, take a look at the following pointers:
+
+* [Building a React Native Flipper Plugin](../tutorial/react-native.mdx)
+* [Building a Desktop Plugin](../tutorial/js-setup.mdx)
+
+:::note
+Plugins for Flipper can be distributed through NPM so sharing them is trivial.
+:::
+
+### Community React Native plugins for Flipper
+
+The React Native community has also started to build plugins for Flipper.
+
+[Reactotron's](https://infinite.red/reactotron) [Flipper plugin](https://github.com/infinitered/flipper-plugin-reactotron) is an example of a standalone React Native desktop app that is ported to work as a Flipper plugin. For more information, see the [Better React Native Debugging with Reactotron in Flipper](https://shift.infinite.red/better-react-native-debugging-with-reactotron-in-flipper-6b823af29220) web page.
+
+If you've got your own Flipper plugin for React Native that you'd like to advertise, please send the Litho team a [pull request](https://github.com/facebook/flipper/blob/main/docs/features/react-native.mdx)!

@@ -1,0 +1,165 @@
+---
+id: documentation-formatting
+title: Markdown Formatting
+description: Tips and guidelines for Mardown used within Static Docs documentation
+keywords:
+    - flipper website formatting
+    - flipper docs formatting
+---
+
+This page provides recommendations on the use of a variety of Markdown features that help you create properly formatted documentation.
+
+For tips and guidelines on when to use the same tools, and several others, see the [Writing Guide](documentation-writing-guide.mdx).
+
+## Structural format
+
+### Headers
+
+* Start each main section with a level 2 header.
+* Sub-sections should follow a hierarchical structure and should use header levels 3 to 5.
+
+**Markdown Example**:
+
+The following example Markdown shows how to use headers.
+
+```bash
+## Level 2 header
+
+### Level 3 header
+
+#### Level 4 header
+
+##### Level 5 header
+```
+
+## Markdown tools
+
+### Backticks
+
+Use Markdown backticks ( \` \), to provide emphasis for items such as file names, classes, methods, parameters, and expressions.
+
+```markdown
+Let's use the `TestComponent`, which has one direct child, `InnerComponent`, and one non-direct child, `Text`.
+```
+
+**Result**:
+Let's use the `TestComponent`, which has one direct child, `InnerComponent`, and one non-direct child, `Text`.
+
+## Code Snippets
+
+For code snippets, remember to add the language tag (`javascript` is used in the following example).
+
+````markdown
+```javascript
+import {addPlugin} from "react-native-flipper"
+
+addPlugin({
+  getId() {
+    return 'ReactNativeExamplePlugin';
+  },
+  onConnect(connection) {
+    mammmals.forEach(({ title, pictureUrl }, index) => {
+      connection.send('newRow', {
+          id: index,
+          title,
+          url: pictureUrl
+      })
+    })
+  },
+  onDisconnect() {
+  }
+})
+````
+
+**Result:**
+
+```javascript
+import {addPlugin} from "react-native-flipper"
+
+addPlugin({
+  getId() {
+    return 'ReactNativeExamplePlugin';
+  },
+  onConnect(connection) {
+    mammmals.forEach(({ title, pictureUrl }, index) => {
+      connection.send('newRow', {
+          id: index,
+          title,
+          url: pictureUrl
+      })
+    })
+  },
+  onDisconnect() {
+  }
+})
+```
+
+For more code blocks features, such as line highlighting, see the Docusaurus [Code blocks](https://docusaurus.io/docs/markdown-features/code-blocks) document.
+
+### Links
+
+Avoid using bare URLs in your documentation. Instead, use referenced hyperlinks, as shown in the following table.
+
+| Type | Code | Displays as |
+| :-- | :-- | :-- |
+| **Bare URL** | `Upload the video to Pixelcloud at https://www.internalfb.com/intern/px/search` | Upload the video to Pixelcloud at https://www.internalfb.com/intern/px/search |
+| **Referenced** | `Upload the video to [Pixelcloud](https://www.internalfb.com/intern/px/search)`| Upload the video to [Pixelcloud](https://www.internalfb.com/intern/px/search) |
+
+:::tip
+Notice the use of square brackets around 'PixelCloud' in the referenced hyperlink.
+:::
+
+### Tabs
+
+To organize content in tabs, Docusaurus provides the `Tabs` React component:
+
+```javascript
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<Tabs
+  groupId="platform"
+  defaultValue="kotlin"
+  values={[
+    {label: 'Kotlin', value: 'kotlin'},
+    {label: 'Java', value: 'java'},
+  ]}>
+  <TabItem value="kotlin">
+    Information about using Kotlin with Flipper.
+  </TabItem>
+  <TabItem value="java">
+    Information about using Java  with Flipper.
+  </TabItem>
+</Tabs>
+```
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+**Result:**
+<Tabs
+  groupId="platform"
+  defaultValue="kotlin"
+  values={[
+    {label: 'Kotlin', value: 'kotlin'},
+    {label: 'Java', value: 'java'},
+  ]}>
+  <TabItem value="kotlin">
+    Information about using Kotlin with Flipper.
+  </TabItem>
+  <TabItem value="java">
+    Information about using Java with Flipper.
+  </TabItem>
+</Tabs>
+
+:::tip
+To sync several `Tabs` components on the website set the same `groupId` for them. More info in
+Docusaurus [Tabs Syncing](https://docusaurus.io/docs/markdown-features/tabs#syncing-tab-choices) docs.
+:::
+
+## Resources
+
+For additional information, see the following resources:
+
+* [StaticDocs Markdown features](https://www.internalfb.com/intern/staticdocs/staticdocs/docs/documenting/markdown-features)
+* [Docusaurus Markdown features](https://docusaurus.io/docs/markdown-features)

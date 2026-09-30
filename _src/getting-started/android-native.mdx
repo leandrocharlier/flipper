@@ -1,0 +1,144 @@
+---
+id: android-native
+title: Adding Flipper to Android apps with Gradle
+sidebar_label: Android with Gradle
+---
+import useBaseUrl from '@docusaurus/useBaseUrl';
+import Link from '@docusaurus/Link';
+
+To set up Flipper for Android, you need to add the necessary dependencies to your app, initialize the Flipper client and enable the plugins you want to use.
+Optionally, you can hook up the diagnostics Activity to help you troubleshoot connection issues.
+
+## Dependencies
+
+Flipper is distributed via Maven Central: add the dependencies to your `build.gradle` file.
+
+You should also explicitly depend on [SoLoader](https://github.com/facebook/soloader) instead of relying on transitive dependency resolution, which is getting deprecated
+with Gradle 5.
+
+There is a 'no-op' implementation of some oft-used Flipper interfaces, which you can use to make it easier to strip Flipper from your release builds:
+
+```groovy
+repositories {
+  mavenCentral()
+}
+
+dependencies {
+  debugImplementation 'com.facebook.flipper:flipper:0.273.0'
+  debugImplementation 'com.facebook.soloader:soloader:0.10.5'
+
+  releaseImplementation 'com.facebook.flipper:flipper-noop:0.273.0'
+}
+```
+
+:::warning
+The `flipper-noop` package provides a limited subset of the APIs provided by the `flipper` package and does not provide any plugin stubs.
+It's recommended that you keep all Flipper instantiation code in a separate build variant to ensure it doesn't accidentally make it into your production builds.
+
+To see how to organise your Flipper initialization into debug and release variants, check this [sample app](https://github.com/facebook/flipper/tree/main/android/sample/src).
+
+Alternatively, have a look at the third-party [flipper-android-no-op](https://github.com/theGlenn/flipper-android-no-op) repository, which provides empty implementations for several Flipper plugins.
+:::
+
+## Application setup
+
+Now you can initialize Flipper in your Application's `onCreate` method, which involves initializing SoLoader (for loading the C++ part of Flipper) and starting a `FlipperClient`.
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<Tabs>
+<TabItem value="kt" label="Kotlin">
+
+```kotlin
+import com.facebook.flipper.android.AndroidFlipperClient
+import com.facebook.flipper.android.utils.FlipperUtils
+import com.facebook.flipper.core.FlipperClient
+import com.facebook.flipper.plugins.inspector.DescriptorMapping
+import com.facebook.flipper.plugins.inspector.InspectorFlipperPlugin
+
+class MyApplication : Application {
+  override fun onCreate() {
+    super.onCreate()
+    SoLoader.init(this, false)
+
+    if (BuildConfig.DEBUG && FlipperUtils.shouldEnableFlipper(this)) {
+      val client = AndroidFlipperClient.getInstance(this)
+      client.addPlugin(InspectorFlipperPlugin(this, DescriptorMapping.withDefaults()))
+      client.start()
+    }
+  }
+}
+```
+
+</TabItem>
+<TabItem value="java" label="Java">
+
+```java
+import com.facebook.flipper.android.AndroidFlipperClient;
+import com.facebook.flipper.android.utils.FlipperUtils;
+import com.facebook.flipper.core.FlipperClient;
+import com.facebook.flipper.plugins.inspector.DescriptorMapping;
+import com.facebook.flipper.plugins.inspector.InspectorFlipperPlugin;
+
+
+public class MyApplication extends Application {
+
+  @Override
+  public void onCreate() {
+    super.onCreate();
+    SoLoader.init(this, false);
+
+    if (BuildConfig.DEBUG && FlipperUtils.shouldEnableFlipper(this)) {
+      final FlipperClient client = AndroidFlipperClient.getInstance(this);
+      client.addPlugin(new InspectorFlipperPlugin(this, DescriptorMapping.withDefaults()));
+      client.start();
+    }
+  }
+}
+```
+
+</TabItem>
+</Tabs>
+
+## Diagnostics
+
+It's recommended that you add the following activity to the manifest, which can help diagnose integration issues and other problems:
+
+```xml
+<activity android:name="com.facebook.flipper.android.diagnostics.FlipperDiagnosticActivity"
+        android:exported="true"/>
+```
+
+## Android snapshots
+
+:::note
+Android snapshot releases are published directly off `main`.
+:::
+
+You can get the latest version by adding the Maven Snapshot repository to your sources and pointing to the most recent `-SNAPSHOT` version.
+
+```groovy
+repositories {
+  maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
+}
+
+dependencies {
+  debugImplementation 'com.facebook.flipper:flipper:0.273.1-SNAPSHOT'
+  debugImplementation 'com.facebook.soloader:soloader:0.10.5'
+
+  releaseImplementation 'com.facebook.flipper:flipper-noop:0.273.1-SNAPSHOT'
+}
+```
+
+## Enabling plugins
+
+Finally, you need to add plugins to your Flipper client.
+
+Above, the Layout Inspector plugin has been added to get you started. See the <Link to={useBaseUrl("/docs/setup/plugins/network")}>Network Plugin</Link> and [Layout Inspector Plugin](https://www.internalfb.com/intern/staticdocs/flipper/docs/features/plugins/inspector/) pages for information on how to add them, and also enable Litho or ComponentKit support.
+
+For examples of integrating other plugins, take a look at the sample apps in the [GitHub repo](https://github.com/facebook/flipper).
+
+## Issues or questions
+
+If you encounter any issues or have any questions, refer to the [Troubleshooting](troubleshooting/troubleshooting.mdx) section.

@@ -1,0 +1,82 @@
+---
+id: custom-ports
+title: Running Flipper with Custom Ports
+sidebar_label: Running Flipper with Custom Ports
+---
+
+## Flipper ports - mobile  apps that support certificate exchange
+
+:::info
+By default, Flipper runs its servers on ports 9088 and 9089.
+The mobile SDKs look for servers on those ports.
+:::
+
+Each of these can be overridden by setting an environment variable, with the format: `${INSECURE_PORT},${SECURE_PORT}`.
+
+To run the desktop app using custom ports, use the following:
+
+```sh
+env FLIPPER_PORTS=1111,2222 ./flipper
+```
+
+or with a dev build:
+
+```sh
+env FLIPPER_PORTS=1111,2222 yarn start
+```
+
+### Android SDK
+
+To configure the Android SDK for custom ports, set the `flipper.ports` prop to your chosen ports `1111,2222` and then launch the Android app:
+
+```sh
+adb shell su 0 setprop flipper.ports 1111,2222
+```
+
+### iOS SDK
+
+To configure the iOS SDK for custom ports, set the FLIPPER_PORTS environment variable in your app launch script or set it system-wide through User Defaults:
+
+```sh
+xcrun simctl spawn booted defaults write "Apple Global Domain" "com.facebook.flipper.ports" -string "1111,2222"
+```
+
+## Flipper ports - apps that do not support certificate exchange
+
+:::information
+Flipper listens on port 8333 for unsecure (browser, Node.js) connections.
+:::
+
+To run the desktop app using custom ports, use the following:
+
+```sh
+env FLIPPER_BROWSER_PORT=1111 ./flipper
+```
+
+or with a dev build:
+
+```sh
+env FLIPPER_BROWSER_PORT=1111 yarn start
+```
+
+To connect to Flipper on a different port from [js-flipper](https://github.com/facebook/flipper/tree/main/js/js-flipper), you need to override its `urlBase` when you [start it](https://github.com/facebook/flipper/blob/0993d21f3b52d38969e4d2e330eb97ec4d840a9d/js/react-flipper-example/src/FlipperTicTacToe.tsx#L19).
+
+```ts
+flipperClient.start('React Tic-Tac-Toe', { urlBase: 'localhost:1111' });
+```
+
+## Metro Server Ports
+
+You can also setup Flipper to use a different Metro Server port (default=8081) using this environement variable, as follows:
+
+```sh
+METRO_SERVER_PORT=3333 ./flipper
+```
+
+## ADB Reverse Proxy ports
+
+You can setup a different ADB port, used for reverse proxying when plugged through USB (default=5037), using the following:
+
+```sh
+ANDROID_ADB_SERVER_PORT=4444 ./flipper
+```
