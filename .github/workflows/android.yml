@@ -71,7 +71,10 @@ jobs:
         shell: pwsh
         run: ./scripts/rebuild-sample-native.ps1 -Sdk $env:ANDROID_HOME
       - name: Build and test every Android module
-        run: bash gradlew stageAndroidPublication testDebugUnitTest :sample:assembleDebug :tutorial:assembleDebug --max-workers=4 --console=plain
+        run: |
+          # Preparation generates Gradle projects that must exist at configuration time.
+          bash gradlew :third-party:prepare --max-workers=4 --console=plain
+          bash gradlew stageAndroidPublication testDebugUnitTest :sample:assembleDebug :tutorial:assembleDebug --max-workers=4 --console=plain
       - name: Validate every Maven artifact and a standalone consumer
         run: |
           VERSION=$(sed -n 's/^VERSION_NAME=//p' gradle.properties | tr -d '\r')

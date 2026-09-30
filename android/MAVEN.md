@@ -52,11 +52,16 @@ Use JDK 17, Gradle 8.14.3 and AGP 8.2.2. First rebuild the native dependencies
 following [BUILDING-16KB.md](BUILDING-16KB.md), then run:
 
 ```text
+gradlew :third-party:prepare
 gradlew stageAndroidPublication testDebugUnitTest
 python scripts/validate-maven-artifacts.py
 python scripts/create-maven-consumer.py
 gradlew -p work/maven-consumer assembleDebug assembleRelease verifyPublishedDependencyGraph
 ```
+
+On a fresh checkout, run `:third-party:prepare` in a separate Gradle invocation:
+it generates the Folly and other native Gradle projects before test dependencies
+are resolved during configuration.
 
 The generated consumer uses the isolated local Maven repository, not project
 dependencies or `mavenLocal()`. Install its debug APK on a 16 KB emulator and
