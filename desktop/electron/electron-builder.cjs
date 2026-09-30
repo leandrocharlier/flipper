@@ -8,6 +8,7 @@ module.exports = {
   asar: true,
   npmRebuild: false,
   beforePack: () => { collectNotices(server); },
+  afterExtract: './preserve-electron-notices.cjs',
   afterPack: './verify-package.cjs',
   directories: {output: '../../dist/electron'},
   files: ['main.cjs', 'server-process.cjs', 'platform.cjs', 'package.json', '!node_modules/**/*'],

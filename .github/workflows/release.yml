@@ -68,7 +68,7 @@ jobs:
           yarn build:flipper-server --desktop
       - name: Test Logs, Network, themes and process lifecycle
         run: |
-          node node_modules/jest/bin/jest.js plugins/public/logs/__tests__ plugins/public/network/__tests__ flipper-ui/src/utils/__tests__/themes.node.tsx --runInBand
+          node node_modules/cross-env/src/bin/cross-env.js TZ=Pacific/Pohnpei node node_modules/jest/bin/jest.js plugins/public/logs/__tests__ plugins/public/network/__tests__ flipper-ui/src/utils/__tests__/themes.node.tsx --runInBand
           npm --prefix electron test
           npm --prefix electron run test:server
       - name: Package desktop

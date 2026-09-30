@@ -9,17 +9,6 @@ module.exports = async ({appOutDir, electronPlatformName, packager}) => {
     ? path.join(appOutDir, `${packager.appInfo.productFilename}.app`, 'Contents', 'Resources')
     : path.join(appOutDir, 'resources');
   const server = path.join(resources, 'server');
-  fs.mkdirSync(path.join(resources, 'licenses'), {recursive: true});
-  // Take notices from the Electron distribution actually unpacked by the
-  // packager. npm may skip Electron's optional binary download on CI.
-  for (const [destination, candidates] of [
-    ['Electron-LICENSE', ['LICENSE.electron.txt', 'LICENSE']],
-    ['LICENSES.chromium.html', ['LICENSES.chromium.html']],
-  ]) {
-    const source = candidates.map(name=>path.join(appOutDir,name)).find(file=>fs.existsSync(file));
-    if (!source) throw new Error(`Electron distribution is missing ${destination}`);
-    fs.copyFileSync(source,path.join(resources,'licenses',destination));
-  }
   const runtime = process.platform === 'win32' ? 'flipper-runtime.exe' : 'flipper-runtime';
   for (const file of [
     runtime,
