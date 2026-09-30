@@ -290,6 +290,9 @@ export class FlipperServerImpl implements FlipperServer {
   }
 
   async startDeviceListeners() {
+    // Host plugins do not depend on ADB or Xcode finishing device discovery.
+    // In particular, the first simctl query can take a long time on macOS.
+    desktopDevice(this);
     const asyncDeviceListenersPromises: Array<Promise<void>> = [];
     if (this.config.settings.enableAndroid) {
       asyncDeviceListenersPromises.push(
@@ -323,11 +326,7 @@ export class FlipperServerImpl implements FlipperServer {
     const asyncDeviceListeners = await Promise.all(
       asyncDeviceListenersPromises,
     );
-    this.disposers.push(
-      ...asyncDeviceListeners,
-      metroDevice(this),
-      desktopDevice(this),
-    );
+    this.disposers.push(...asyncDeviceListeners, metroDevice(this));
   }
 
   on<Event extends keyof FlipperServerEvents>(

@@ -8,6 +8,7 @@ const {BuildEnvironment} = require('../../plugins/public/node_modules/@mockoon/c
 module.exports = async function testMockApi({run, wait, send, profile}) {
   const host = process.platform === 'win32' ? 'Windows' : process.platform === 'darwin' ? 'Mac' : 'Linux';
   await wait(`(() => {
+    Array.from(document.querySelectorAll('.ant-modal button')).find(e=>e.textContent.trim()==='Close')?.click();
     const selector=document.querySelector('button[title="Select the device / app to inspect"]');
     if (!selector?.textContent.includes(${JSON.stringify(host)})) {
       const device=Array.from(document.querySelectorAll('[role="menuitem"]')).find(e=>e.textContent.trim()===${JSON.stringify(host)});
