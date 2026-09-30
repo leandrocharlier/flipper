@@ -236,9 +236,10 @@ export default (state: State = INITAL_STATE, action: Actions): State => {
       }
 
       const selectNewDevice =
-        !state.selectedDevice ||
-        !state.selectedDevice.isConnected ||
-        state.userPreferredDevice === payload.title;
+        !state.selectedDevice?.isArchived &&
+        (!state.selectedDevice ||
+          !state.selectedDevice.isConnected ||
+          state.userPreferredDevice === payload.title);
       let selectedAppId = state.selectedAppId;
 
       if (selectNewDevice) {
@@ -282,7 +283,13 @@ export default (state: State = INITAL_STATE, action: Actions): State => {
 
       let selectedNewDevice: BaseDevice | null = null;
       let selectedNewAppId: null | string = null;
-      if (newDevices.length > 0) {
+      if (
+        state.selectedDevice?.isArchived &&
+        newDevices.includes(state.selectedDevice)
+      ) {
+        selectedNewDevice = state.selectedDevice;
+        selectedNewAppId = state.selectedAppId;
+      } else if (newDevices.length > 0) {
         selectedNewDevice = newDevices[0];
         selectedNewAppId =
           getAllClients(state).find((c) => c.device === selectedNewDevice)
@@ -347,12 +354,16 @@ export default (state: State = INITAL_STATE, action: Actions): State => {
         draft.clients.set(payload.id, payload);
 
         // select new client if nothing select, this one is preferred, or the old one is offline
+        // A live connection must not interrupt an imported session. Clients
+        // belonging to that same import can still be selected as it loads.
         const selectNewClient =
-          !draft.selectedAppId ||
-          draft.userPreferredApp === payload.query.app ||
-          // TODO: Fix this the next time the file is edited.
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          draft.clients.get(draft.selectedAppId!)?.connected.get() === false;
+          (!draft.selectedDevice?.isArchived ||
+            draft.selectedDevice === payload.device) &&
+          (!draft.selectedAppId ||
+            draft.userPreferredApp === payload.query.app ||
+            // TODO: Fix this the next time the file is edited.
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            draft.clients.get(draft.selectedAppId!)?.connected.get() === false);
 
         if (selectNewClient) {
           draft.selectedAppId = payload.id;

@@ -27,6 +27,7 @@ import {
 } from '../../__tests__/test-utils/mockConsole';
 import {TestDevice} from '../../devices/TestDevice';
 import BaseDevice from '../../devices/BaseDevice';
+import ArchivedDevice from '../../devices/ArchivedDevice';
 
 let mockedConsole: MockedConsole;
 beforeEach(() => {
@@ -55,6 +56,30 @@ test('doing a double REGISTER_DEVICE fails', () => {
       payload: device2,
     });
   }).toThrow('still connected');
+});
+
+test('live device registration and removal preserve the selected import', () => {
+  const archived = new ArchivedDevice({
+    serial: 'synthetic-import',
+    deviceType: 'physical',
+    title: 'Synthetic import',
+    os: 'Android',
+  });
+  const live = new TestDevice(
+    'live-device',
+    'physical',
+    'Live device',
+    'Android',
+  );
+  let state = reducer(undefined, {type: 'REGISTER_DEVICE', payload: archived});
+  state = reducer(state, selectDevice(archived));
+  state = reducer(state, {type: 'REGISTER_DEVICE', payload: live});
+  expect(state.selectedDevice).toBe(archived);
+  live.connected.set(false);
+  state = reducer(state, {type: 'UNREGISTER_DEVICE', payload: live});
+  expect(state.selectedDevice).toBe(archived);
+  state = reducer(state, {type: 'UNREGISTER_DEVICE', payload: archived});
+  expect(state.selectedDevice).toBe(null);
 });
 
 test('selectPlugin sets deepLinkPayload correctly', () => {
@@ -290,6 +315,23 @@ describe('selection changes', () => {
       userPreferredPlugin: TestPlugin1.id,
       userPreferredApp: d1app1.query.app,
     });
+  });
+
+  test('a live client does not replace a selected imported session', async () => {
+    const archived = await mockFlipper.createDevice({
+      serial: 'synthetic-import',
+      archived: true,
+    });
+    store.dispatch(selectDevice(archived));
+    await mockFlipper.createClient(device2, 'arriving-live-app');
+    expect(store.getState().connections.selectedDevice).toBe(archived);
+    expect(store.getState().connections.selectedAppId).toBe(null);
+    const importedClient = await mockFlipper.createClient(
+      archived,
+      'imported-app',
+    );
+    expect(store.getState().connections.selectedDevice).toBe(archived);
+    expect(store.getState().connections.selectedAppId).toBe(importedClient.id);
   });
 
   test('introducing new client does select it if preferred', async () => {

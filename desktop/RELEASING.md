@@ -16,6 +16,7 @@ yarn build:flipper-server --desktop
 npm --prefix electron ci
 npm --prefix electron test
 npm --prefix electron run test:server
+yarn test --runInBand
 ```
 
 Close running Flipper instances before rebuilding/testing the backend.
@@ -31,6 +32,9 @@ Run **Desktop release** with the matching desktop version and release notes at
 `desktop/releases/<version>.md`. Native runners build Windows x64, Linux x64,
 macOS x64 and macOS arm64, run tests and upload the installers. The publish job
 only runs after all four native builds and packaged-app tests pass.
+The release gate runs the complete desktop Jest suite, regardless of which
+plugins a maintainer uses. See `TESTING.md` for coverage limits and inherited
+skips; skipped tests must never be reported as passing tests.
 
 - `publish_release=true` creates the GitHub release and attaches SHA-256 checksums.
 - `publish_android=true` is the normal default: dispatch Android/Maven publishing

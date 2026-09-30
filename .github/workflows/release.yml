@@ -60,15 +60,20 @@ jobs:
       - name: Install dependencies
         run: |
           npm install --global yarn@1.22.22 --force
-          yarn install --frozen-lockfile --non-interactive
+          for attempt in 1 2 3; do
+            yarn install --frozen-lockfile --non-interactive && break
+            if [ "$attempt" = 3 ]; then exit 1; fi
+            sleep 5
+          done
           npm --prefix electron ci
       - name: Build themes and desktop backend
         run: |
           yarn build:themes
           yarn build:flipper-server --desktop
-      - name: Test Logs, Network, themes and process lifecycle
+      - name: Test complete desktop suite and process lifecycle
         run: |
-          node node_modules/cross-env/src/bin/cross-env.js TZ=Pacific/Pohnpei node node_modules/jest/bin/jest.js plugins/public/logs/__tests__ plugins/public/network/__tests__ flipper-ui/src/utils/__tests__/themes.node.tsx --runInBand
+          node node_modules/typescript/bin/tsc --noEmit
+          node node_modules/cross-env/src/bin/cross-env.js TZ=Pacific/Pohnpei node node_modules/jest/bin/jest.js --runInBand
           npm --prefix electron test
           npm --prefix electron run test:server
       - name: Package desktop

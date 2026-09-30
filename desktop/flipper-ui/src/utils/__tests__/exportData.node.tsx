@@ -19,7 +19,11 @@ import {
 } from '../exportData';
 import {FlipperPlugin, FlipperDevicePlugin} from '../../plugin';
 import {default as Client, ClientExport} from '../../Client';
-import {selectedPlugins, State as PluginsState} from '../../reducers/plugins';
+import {
+  selectedPlugins,
+  pluginsInitialized,
+  State as PluginsState,
+} from '../../reducers/plugins';
 import {
   createMockFlipperWithPlugin,
   wrapSandy,
@@ -1586,68 +1590,102 @@ test('Sandy plugin with custom import', async () => {
   ).toBe(4);
 });
 
-test('Sandy device plugin with custom import', async () => {
-  const plugin = new _SandyPluginDefinition(
-    TestUtils.createMockPluginDetails({pluginType: 'device'}),
-    {
-      supportsDevice: () => true,
-      devicePlugin(client: DevicePluginClient) {
-        const counter = createState(0);
-        client.onImport((data) => {
-          counter.set(data.count);
-        });
+test.each([true, false])(
+  'Sandy device plugin with custom import (plugins ready: %s)',
+  async (initiallyReady) => {
+    const plugin = new _SandyPluginDefinition(
+      TestUtils.createMockPluginDetails({pluginType: 'device'}),
+      {
+        supportsDevice: () => true,
+        devicePlugin(client: DevicePluginClient) {
+          const counter = createState(0);
+          client.onImport((data) => {
+            counter.set(data.count);
+          });
 
-        return {
-          counter,
-        };
-      },
-      Component() {
-        return null;
-      },
-    },
-  );
-
-  const data = {
-    clients: [],
-    device: {
-      deviceType: 'archivedPhysical',
-      logs: [],
-      os: 'Android',
-      serial: '2e52cea6-94b0-4ea1-b9a8-c9135ede14ca-serial',
-      title: 'MockAndroidDevice',
-      pluginStates: {
-        [plugin.id]: {
-          count: 2,
+          return {
+            counter,
+          };
+        },
+        Component() {
+          return null;
         },
       },
-    },
-    deviceScreenshot: null,
-    fileVersion: '0.9.99',
-    flipperReleaseRevision: undefined,
-    pluginStates2: {},
-    store: {
-      activeNotifications: [],
-      pluginStates: {},
-    },
-  };
+    );
 
-  const {store} = await createMockFlipperWithPlugin(plugin);
+    const data = {
+      clients: [],
+      device: {
+        deviceType: 'archivedPhysical',
+        logs: [],
+        os: 'Android',
+        serial: '2e52cea6-94b0-4ea1-b9a8-c9135ede14ca-serial',
+        title: 'MockAndroidDevice',
+        pluginStates: {
+          [plugin.id]: {
+            count: 2,
+          },
+        },
+      },
+      deviceScreenshot: null,
+      fileVersion: '0.9.99',
+      flipperReleaseRevision: undefined,
+      pluginStates2: {},
+      store: {
+        activeNotifications: [],
+        pluginStates: {},
+      },
+    };
 
-  await importDataToStore('unittest.json', JSON.stringify(data), store);
+    const {store} = await createMockFlipperWithPlugin(plugin);
 
-  expect(
-    store
-      .getState()
-      .connections.devices[0].sandyPluginStates.get(plugin.id)
-      ?.instanceApi.counter.get(),
-  ).toBe(0);
-  expect(
-    store
-      .getState()
-      .connections.devices[1].sandyPluginStates.get(plugin.id)
-      ?.instanceApi.counter.get(),
-  ).toBe(2);
-});
+    if (initiallyReady) {
+      await importDataToStore('unittest.json', JSON.stringify(data), store);
+    } else {
+      const readState = store.getState.bind(store);
+      let ready = false;
+      const stateSpy = jest.spyOn(store, 'getState').mockImplementation(() => {
+        const state = readState();
+        return ready
+          ? state
+          : {
+              ...state,
+              plugins: {
+                ...state.plugins,
+                initialized: false,
+                devicePlugins: new Map(),
+              },
+            };
+      });
+      try {
+        const importing = importDataToStore(
+          'unittest.json',
+          JSON.stringify(data),
+          store,
+        );
+        expect(store.getState().connections.devices).toHaveLength(1);
+        ready = true;
+        store.dispatch(pluginsInitialized());
+        await importing;
+      } finally {
+        stateSpy.mockRestore();
+      }
+    }
+
+    expect(
+      store
+        .getState()
+        .connections.devices[0].sandyPluginStates.get(plugin.id)
+        ?.instanceApi.counter.get(),
+    ).toBe(0);
+    expect(
+      store
+        .getState()
+        .connections.devices[1].sandyPluginStates.get(plugin.id)
+        ?.instanceApi.counter.get(),
+    ).toBe(2);
+  },
+);
 
 test('Sandy plugins with complex data are imported  / exported correctly', async () => {
   const plugin = new _SandyPluginDefinition(

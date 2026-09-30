@@ -42,6 +42,7 @@ import ArchivedDevice from '../devices/ArchivedDevice';
 import {importFile} from './importFile';
 import {exportFileBinary} from './exportFile';
 import {getFlipperServer, getFlipperServerConfig} from '../flipperServer';
+import {waitFor} from './waitFor';
 
 export const IMPORT_FLIPPER_TRACE_EVENT = 'import-flipper-trace';
 export const EXPORT_FLIPPER_TRACE_EVENT = 'export-flipper-trace';
@@ -523,6 +524,9 @@ export async function importDataToStore(
   if (device == null) {
     return;
   }
+  // Device plugins initialize asynchronously during startup. Loading an import
+  // before their definitions exist would discard the imported plugin states.
+  await waitFor(store, (state) => state.plugins.initialized);
   const {serial, deviceType, title, os} = device;
 
   const archivedDevice = new ArchivedDevice({
