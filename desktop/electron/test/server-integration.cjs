@@ -4,7 +4,8 @@ const http = require('node:http');
 const path = require('node:path');
 const {ServerProcess} = require('../server-process.cjs');
 const root = path.resolve(__dirname, '../../..');
-const directory = path.join(root, 'dist/flipper-server-windows');
+const {serverDirectory} = require('../platform.cjs');
+const directory = serverDirectory();
 
 test('desktop startup leaves an existing HTTP service untouched', async (t) => {
   let requests = 0;

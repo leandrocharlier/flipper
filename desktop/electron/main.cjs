@@ -3,6 +3,8 @@ const {app, BrowserWindow, Menu, dialog, shell} = require('electron');
 const path = require('node:path');
 const fs = require('node:fs');
 const {ServerProcess} = require('./server-process.cjs');
+const {serverDirectory} = require('./platform.cjs');
+const desktopVersion = require('./package.json').version;
 
 const ORIGIN = 'http://localhost:52342';
 function isInternal(url) {
@@ -26,7 +28,7 @@ async function createDesktop({
 } = {}) {
   const directory = app.isPackaged
     ? path.join(process.resourcesPath, 'server')
-    : path.resolve(__dirname, '../../dist/flipper-server-windows');
+    : serverDirectory();
   const logFile = path.join(app.getPath('logs'), 'flipper-server.log');
   const stateFile = path.join(app.getPath('userData'), 'window.json');
   let previous = {};
@@ -34,7 +36,7 @@ async function createDesktop({
     previous = JSON.parse(fs.readFileSync(stateFile, 'utf8'));
   } catch {}
   const window = new BrowserWindow({
-    title: 'Flipper',
+    title: `Flipper Community ${desktopVersion}`,
     width: Math.max(900, Math.min(2200, previous.width || 1400)),
     height: Math.max(600, Math.min(1400, previous.height || 900)),
     minWidth: 900,
@@ -50,6 +52,10 @@ async function createDesktop({
     },
   });
   const session = window.webContents.session;
+  window.on('page-title-updated', (event) => {
+    event.preventDefault();
+    window.setTitle(`Flipper Community ${desktopVersion}`);
+  });
   session.setPermissionCheckHandler(() => false);
   session.setPermissionRequestHandler((_contents, _permission, callback) =>
     callback(false),
@@ -156,6 +162,15 @@ function launch(options = {}) {
         {
           label: 'Help',
           submenu: [
+            {
+              label: 'About Flipper Community',
+              click: () => dialog.showMessageBox(desktop.window, {
+                type: 'info',
+                title: 'About Flipper Community',
+                message: `Flipper Community ${desktopVersion}`,
+                detail: 'Maintained by Leandro Charlier. Based on Meta Flipper 0.273.0.\nAn independent community fork, not an official Meta release.\nMIT license; third-party notices are included in the application resources.',
+              }),
+            },
             {
               label: 'Open logs folder',
               click: () => shell.openPath(app.getPath('logs')),

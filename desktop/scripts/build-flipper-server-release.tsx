@@ -39,6 +39,7 @@ import {exec} from 'child_process';
 import fetch from '@adobe/node-fetch-retry';
 import plist from 'simple-plist';
 import {createHash} from 'crypto';
+import {prepareDesktopBundle} from './desktop-bundle';
 
 // This needs to be tested individually. As of 2022Q2, node17 is not supported.
 const SUPPORTED_NODE_PLATFORM = 'node16';
@@ -142,6 +143,12 @@ const argv = yargs
     },
     win: {
       describe: 'Build a platform-specific bundle for Windows.',
+      type: 'boolean',
+      default: false,
+    },
+    desktop: {
+      describe:
+        'Build a Node 24 backend for the Electron desktop on the current OS and architecture.',
       type: 'boolean',
       default: false,
     },
@@ -439,6 +446,8 @@ async function buildServerRelease() {
   const archive = await packNpmArchive(dir, versionNumber);
   await runPostBuildAction(archive, dir);
   await stripForwardingToolFromArchive(archive);
+
+  if (argv.desktop) await prepareDesktopBundle(dir, distDir);
 
   const platforms: BuildPlatform[] = [];
   if (argv.linux) {

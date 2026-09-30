@@ -50,7 +50,7 @@ class ServerProcess {
       !fs.existsSync(path.join(this.directory, 'server.js'))
     ) {
       throw new Error(
-        'Flipper server bundle is missing. Build the Windows server before packaging Electron.',
+        'Flipper server bundle is missing. Run yarn build:flipper-server --desktop before packaging Electron.',
       );
     }
     fs.mkdirSync(path.dirname(this.logFile), {recursive: true});

@@ -1,203 +1,134 @@
-name: Release
-# This action runs on push to 'main' and below specified paths
+name: Desktop release
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - "desktop/package.json"
-
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Desktop version (must match desktop/electron/package.json)
+        required: true
+        default: '0.3.0'
+      publish_android:
+        description: Also start Maven publishing after the GitHub release
+        type: boolean
+        default: true
+      publish_release:
+        description: Publish downloads after all native builds and tests pass
+        type: boolean
+        default: true
+permissions:
+  contents: read
+concurrency:
+  group: desktop-release
+  cancel-in-progress: false
 jobs:
-  release:
-    runs-on: ubuntu-latest
-    outputs:
-      tag: ${{ steps.tag-version-commit.outputs.tag }}
-
-    steps:
-      - uses: passy/extract-version-commit@v1.0.0
-        id: extract-version-commit
-        with:
-          version_regex: '^Flipper Release: v([0-9]+\.[0-9]+\.[0-9]+)(?:\n|$)'
-      - uses: actions/checkout@v3.5.3
-        if: ${{ steps.extract-version-commit.outputs.commit != ''}}
-        with:
-          ref: ${{ steps.extract-version-commit.outputs.commit }}
-      - name: Tag version commit
-        if: ${{ steps.extract-version-commit.outputs.commit != ''}}
-        id: tag-version-commit
-        uses: passy/tag-version-commit@v1.2.0
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          ref: ${{ steps.extract-version-commit.outputs.commit }}
-          version_tag_prefix: "v"
-          version_assertion_command: 'grep -q "\"version\": \"$version\"" desktop/package.json'
-      - name: Create release
-        if: ${{ steps.tag-version-commit.outputs.tag != '' }}
-        uses: softprops/action-gh-release@v0.1.15
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ steps.tag-version-commit.outputs.tag }}
-          name: ${{ steps.tag-version-commit.outputs.tag }}
-          body: |
-            See https://github.com/facebook/flipper/blob/main/desktop/static/CHANGELOG.md
-            for full notes.
-          draft: false
-          prerelease: false
-
-  build-server-mac:
-    needs:
-      - release
-    runs-on: macos-latest
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-2022
+            target: win
+            arch: x64
+          - os: macos-15-intel
+            target: mac
+            arch: x64
+          - os: macos-15
+            target: mac
+            arch: arm64
+          - os: ubuntu-24.04
+            target: linux
+            arch: x64
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
     env:
-      desktop-directory: ./desktop
-
+      CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+      RELEASE_VERSION: ${{ inputs.version }}
+      TZ: Pacific/Pohnpei
+    defaults:
+      run:
+        working-directory: desktop
+        shell: bash
     steps:
-      - uses: actions/checkout@v3.5.3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          ref: ${{ needs.release.outputs.tag }}
-      - uses: actions/setup-node@v3.6.0
-        with:
-          node-version: "18.x"
-      - name: Install
-        uses: nick-invision/retry@v2.0.0
-        with:
-          timeout_minutes: 10
-          max_attempts: 3
-          command: cd ${{env.desktop-directory}} && yarn
-      - name: Build
-        run: cd ${{env.desktop-directory}} && yarn build:flipper-server --mac --dmg --linux --win --tar
-      - name: List dist artifacts
-        run: ls -l dist/
-      - name: Upload Mac x86-64
-        uses: actions/upload-artifact@v4
-        with:
-          name: "Flipper-server-mac-x64.dmg"
-          path: "dist/Flipper-server-mac-x64.dmg"
-      - name: Upload Mac aarch64
-        uses: actions/upload-artifact@v4
-        with:
-          name: "Flipper-server-mac-aarch64.dmg"
-          path: "dist/Flipper-server-mac-aarch64.dmg"
-      - name: Upload Linux x64
-        uses: actions/upload-artifact@v4
-        with:
-          name: "flipper-server-linux.tar.gz"
-          path: "dist/flipper-server-linux.tar.gz"
-      - name: Upload Windows x64
-        uses: actions/upload-artifact@v4
-        with:
-          name: "flipper-server-windows.tar.gz"
-          path: "dist/flipper-server-windows.tar.gz"
-
-  build-flipper-server:
-    needs:
-      - release
-    runs-on: ubuntu-latest
-    env:
-      desktop-directory: ./desktop
-
-    steps:
-      - uses: actions/checkout@v3.5.3
-        with:
-          ref: ${{ needs.release.outputs.tag }}
-      - uses: actions/setup-node@v3.6.0
-        with:
-          node-version: "18.x"
-      - name: Install
-        uses: nick-invision/retry@v2.0.0
-        with:
-          timeout_minutes: 10
-          max_attempts: 3
-          command: cd ${{env.desktop-directory}} && yarn
-      - name: Build
-        run: cd ${{env.desktop-directory}} && yarn build:flipper-server
-      - name: List dist artifacts
-        run: ls -l dist/
-      - name: Upload flipper-server
-        uses: actions/upload-artifact@v4
-        with:
-          name: "flipper-server.tgz"
-          path: "dist/flipper-server.tgz"
-
-  publish:
-    needs:
-      - build-server-mac
-      - build-flipper-server
-      - release
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v3.5.3
-        with:
-          ref: ${{ needs.release.outputs.tag }}
-      - name: Download Flipper Server x86-64
-        if: ${{ needs.release.outputs.tag != '' }}
-        uses: actions/download-artifact@v4
-        with:
-          name: "Flipper-server-mac-x64.dmg"
-          path: "Flipper-server-mac-x64.dmg"
-      - name: Download Flipper Server aarch64
-        if: ${{ needs.release.outputs.tag != '' }}
-        uses: actions/download-artifact@v4
-        with:
-          name: "Flipper-server-mac-aarch64.dmg"
-          path: "Flipper-server-mac-aarch64.dmg"
-      - name: Download Flipper Server
-        if: ${{ needs.release.outputs.tag != '' }}
-        uses: actions/download-artifact@v4
-        with:
-          name: "flipper-server.tgz"
-          path: "flipper-server.tgz"
-      - name: GitHub Upload Release Artifacts
-        if: ${{ needs.release.outputs.tag != '' }}
-        uses: aigoncharov/github-upload-release-artifacts-action@2.2.3
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          created_tag: ${{ needs.release.outputs.tag }}
-          args: flipper-server.tgz/flipper-server.tgz Flipper-server-mac-x64.dmg/Flipper-server-mac-x64.dmg Flipper-server-mac-aarch64.dmg/Flipper-server-mac-aarch64.dmg
-      - name: Set up npm token
-        run: echo "//registry.yarnpkg.com/:_authToken=${{ secrets.FLIPPER_NPM_TOKEN }}" >> ~/.npmrc
-      - name: Publish flipper-server on NPM
-        if: ${{ needs.release.outputs.tag != '' }}
+          node-version: '24.21.0'
+      - name: Check release version
+        run: node -e 'const v=process.env.RELEASE_VERSION; if(!/^\d+\.\d+\.\d+$/.test(v) || require("./electron/package.json").version!==v) process.exit(1)'
+      - name: Install Linux system libraries
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libsecret-1-0 libfuse2t64 xvfb
+      - name: Install dependencies
         run: |
-          tar zxvf flipper-server.tgz/flipper-server.tgz
-          cd package
-          yarn publish
-      - name: Open issue on failure
+          npm install --global yarn@1.22.22 --force
+          yarn install --frozen-lockfile --non-interactive
+          npm --prefix electron ci
+      - name: Build themes and desktop backend
+        run: |
+          yarn build:themes
+          yarn build:flipper-server --desktop
+      - name: Test Logs, Network, themes and process lifecycle
+        run: |
+          node node_modules/jest/bin/jest.js plugins/public/logs/__tests__ plugins/public/network/__tests__ flipper-ui/src/utils/__tests__/themes.node.tsx --runInBand
+          npm --prefix electron test
+          npm --prefix electron run test:server
+      - name: Package desktop
+        run: npm --prefix electron run dist:${{ matrix.target }} -- --${{ matrix.arch }}
+      - name: Configure Linux Electron sandbox
+        if: runner.os == 'Linux'
+        run: |
+          sudo chown root:root ../dist/electron/linux-unpacked/chrome-sandbox
+          sudo chmod 4755 ../dist/electron/linux-unpacked/chrome-sandbox
+      - name: Test packaged application
+        run: |
+          if [ "$RUNNER_OS" = Linux ]; then
+            xvfb-run --auto-servernum node electron/test/packaged.cjs
+          else
+            node electron/test/packaged.cjs
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: desktop-${{ matrix.target }}-${{ matrix.arch }}
+          if-no-files-found: error
+          retention-days: 7
+          path: |
+            dist/electron/Flipper-*.exe
+            dist/electron/Flipper-*.zip
+            dist/electron/Flipper-*.dmg
+            dist/electron/Flipper-*.AppImage
+            dist/electron/Flipper-*.tar.gz
+      - uses: actions/upload-artifact@v4
         if: failure()
-        uses: JasonEtco/create-an-issue@v2.9.1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          REPOSITORY: ${{ github.repository }}
-          RUN_ID: ${{ github.run_id }}
-          WORKFLOW_NAME: "Publish"
         with:
-          filename: .github/action-failure-template.md
-
-  dispatch:
-    needs:
-      - release
-    runs-on: ubuntu-latest
-
+          name: diagnostics-${{ matrix.target }}-${{ matrix.arch }}
+          retention-days: 7
+          path: work/packaged-smoke
+  publish:
+    needs: build
+    if: inputs.publish_release
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      actions: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      RELEASE_VERSION: ${{ inputs.version }}
+      RELEASE_COMMIT: ${{ github.sha }}
     steps:
-      - name: Publish Workflow Dispatch
-        if: ${{ needs.release.outputs.tag != '' }}
-        uses: benc-uk/workflow-dispatch@v1.2.2
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
         with:
-          workflow: Publish Pods
-          ref: ${{ needs.release.outputs.tag }}
-      - name: Publish NPM
-        if: ${{ needs.release.outputs.tag != '' }}
-        uses: benc-uk/workflow-dispatch@v1.2.2
-        with:
-          workflow: Publish NPM
-          ref: ${{ needs.release.outputs.tag }}
-      - name: Publish Android
-        if: ${{ needs.release.outputs.tag != '' }}
-        uses: benc-uk/workflow-dispatch@v1.2.2
-        with:
-          workflow: Publish Android
-          ref: ${{ needs.release.outputs.tag }}
-          inputs: '{"tag": "${{ needs.release.outputs.tag }}"}'
+          pattern: desktop-*
+          merge-multiple: true
+          path: release-assets
+      - name: Publish tested desktop artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd release-assets
+          sha256sum Flipper-* > SHA256SUMS.txt
+          gh release create "v$RELEASE_VERSION" --target "$RELEASE_COMMIT" --draft --title "Flipper Community v$RELEASE_VERSION" --notes-file "../desktop/releases/$RELEASE_VERSION.md" Flipper-* SHA256SUMS.txt
+          gh release edit "v$RELEASE_VERSION" --draft=false --latest
+      - name: Publish Android dependencies (normal release default)
+        if: inputs.publish_android
+        run: gh workflow run publish-android.yml --ref "v$RELEASE_VERSION" --field "tag=v$RELEASE_VERSION"

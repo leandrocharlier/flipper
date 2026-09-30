@@ -1,9 +1,7 @@
 name: Publish Android
-# This action runs on 'git push tag v*' and worflow dispatch as specified below
+# Dispatched by Desktop release by default, or manually for a Maven-only release.
+# Desktop-only test releases explicitly skip this workflow.
 on:
-  push:
-    tags:
-      - v*
   workflow_dispatch:
     inputs:
       tag:

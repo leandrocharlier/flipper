@@ -1,7 +1,7 @@
 {
   "name": "flipper-desktop",
   "productName": "Flipper",
-  "version": "0.273.2",
+  "version": "0.3.0",
   "description": "Flipper desktop application for Android debugging",
   "author": "Flipper contributors",
   "license": "MIT",
@@ -13,46 +13,13 @@
     "test": "node --test test/*.test.cjs",
     "test:smoke": "electron test/smoke.cjs",
     "test:server": "node --test test/server-integration.cjs",
-    "pack:win": "electron-builder --win dir --x64",
-    "dist:win": "electron-builder --win nsis zip --x64 --publish never"
+    "pack:win": "electron-builder --config electron-builder.cjs --win dir --x64",
+    "dist:win": "electron-builder --config electron-builder.cjs --win nsis zip --x64 --publish never",
+    "dist:mac": "electron-builder --config electron-builder.cjs --mac --publish never",
+    "dist:linux": "electron-builder --config electron-builder.cjs --linux --x64 --publish never"
   },
   "devDependencies": {
     "electron": "44.5.0",
     "electron-builder": "26.15.3"
-  },
-  "build": {
-    "appId": "io.github.leandrocharlier.flipper",
-    "asar": true,
-    "npmRebuild": false,
-    "afterPack": "./verify-package.cjs",
-    "directories": {
-      "output": "../../dist/electron"
-    },
-    "files": [
-      "main.cjs",
-      "server-process.cjs",
-      "package.json"
-    ],
-    "extraResources": [
-      {
-        "from": "../../dist/flipper-server-windows",
-        "to": "server"
-      },
-      {
-        "from": "../../dist/flipper-server-windows/node_modules",
-        "to": "server/node_modules"
-      }
-    ],
-    "win": {
-      "icon": "../static/icon.ico",
-      "signExecutable": false
-    },
-    "nsis": {
-      "oneClick": false,
-      "perMachine": false,
-      "allowToChangeInstallationDirectory": true,
-      "createDesktopShortcut": true
-    },
-    "artifactName": "Flipper-${version}-Windows-${arch}.${ext}"
   }
 }

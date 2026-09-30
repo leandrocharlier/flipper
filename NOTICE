@@ -1,0 +1,19 @@
+Flipper Community
+
+This is an independent maintenance fork by Leandro Charlier:
+https://github.com/leandrocharlier/flipper
+
+Based on Flipper by Meta Platforms, Inc. and affiliates:
+https://github.com/facebook/flipper
+
+The original Flipper copyright and MIT license are retained in LICENSE.
+Fork contributions are distributed under the same MIT license.
+This distribution is not an official Meta product and is not endorsed by Meta.
+Names and trademarks belong to their respective owners.
+
+Third-party software retains its own licenses and copyright notices.
+The desktop packages include THIRD-PARTY-NOTICES.txt for JavaScript dependencies,
+NODE-LICENSE for Node.js and its bundled components, the unmodified JetBrains
+Mono font and OFL-1.1 license, and Electron/Chromium license notices provided by
+the Electron distribution. These licenses are not replaced by the Flipper MIT
+license. See desktop/themes/fonts/README.md for the font's original source.

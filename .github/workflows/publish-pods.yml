@@ -1,9 +1,6 @@
 name: Publish Pods
-# This action runs on 'git push tag v*'
+# Upstream publisher retained for explicit manual use only.
 on:
-  push:
-    tags:
-      - v*
   workflow_dispatch:
 
 jobs:
