@@ -8,13 +8,14 @@
 package com.facebook.flipper.sample.tutorial.ui
 
 import android.net.Uri
-import com.facebook.fresco.vito.litho.FrescoVitoImage2
+import com.facebook.drawee.backends.pipeline.Fresco
 import com.facebook.litho.Component
 import com.facebook.litho.ComponentContext
 import com.facebook.litho.annotations.LayoutSpec
 import com.facebook.litho.annotations.OnCreateLayout
 import com.facebook.litho.annotations.Prop
 import com.facebook.litho.annotations.PropDefault
+import com.facebook.litho.fresco.FrescoImage
 
 @LayoutSpec
 object SingleImageComponentSpec {
@@ -26,5 +27,9 @@ object SingleImageComponentSpec {
       c: ComponentContext,
       @Prop image: Uri,
       @Prop(optional = true) imageAspectRatio: Float
-  ): Component = FrescoVitoImage2.create(c).uri(image).imageAspectRatio(imageAspectRatio).build()
+  ): Component =
+      FrescoImage.create(c)
+          .controller(Fresco.newDraweeControllerBuilder().setUri(image).build())
+          .imageAspectRatio(imageAspectRatio)
+          .build()
 }

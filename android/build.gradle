@@ -12,7 +12,6 @@ apply plugin: 'kotlinx-serialization'
 android {
     namespace 'com.facebook.flipper'
     compileSdkVersion rootProject.compileSdkVersion
-    buildToolsVersion rootProject.buildToolsVersion
     ndkVersion rootProject.ndkVersion
     // Uncomment this and enable the database plugin test when roboelectric is upgraded
     // testOptions.unitTests.includeAndroidResources = true

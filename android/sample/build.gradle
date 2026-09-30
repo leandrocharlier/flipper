@@ -13,7 +13,6 @@ plugins {
 android {
     namespace 'com.facebook.flipper.sample'
     compileSdkVersion rootProject.compileSdkVersion
-    buildToolsVersion rootProject.buildToolsVersion
     ndkVersion rootProject.ndkVersion
 
     defaultConfig {
@@ -91,7 +90,10 @@ dependencies {
     implementation deps.frescoVito
     implementation deps.frescoVitoLitho
     implementation deps.inferAnnotations
-    debugImplementation deps.flipperFrescoPlugin
+    debugImplementation(deps.flipperFrescoPlugin) {
+        // Use the local :android SDK below instead of Fresco's upstream Flipper.
+        exclude group: 'com.facebook.flipper', module: 'flipper'
+    }
 
     // Integration test
     androidTestImplementation deps.testCore

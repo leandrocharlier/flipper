@@ -34,6 +34,11 @@ android {
     }
 
     packagingOptions {
+        // AGP 8.2 does not align uncompressed native libraries to 16 KB in the APK.
+        // Extract compressed libraries at install time, as in the sample app.
+        jniLibs {
+            useLegacyPackaging true
+        }
         pickFirst "**/libcrypto.so"
         pickFirst "**/libevent-2.1.so"
         pickFirst "**/libevent_core-2.1.so"
@@ -54,7 +59,10 @@ dependencies {
     implementation project(':android')
     implementation project(':network-plugin')
     implementation project(':litho-plugin')
-    implementation deps.flipperFrescoPlugin
+    implementation(deps.flipperFrescoPlugin) {
+        // The local :android SDK above supplies Flipper for this plugin.
+        exclude group: 'com.facebook.flipper', module: 'flipper'
+    }
     implementation deps.soloader
 
     // Litho

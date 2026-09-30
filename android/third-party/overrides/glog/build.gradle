@@ -10,7 +10,6 @@ apply plugin: 'com.android.library'
 android {
     namespace 'com.glog'
     compileSdkVersion rootProject.compileSdkVersion
-    buildToolsVersion rootProject.buildToolsVersion
     ndkVersion rootProject.ndkVersion
 
     defaultConfig {
