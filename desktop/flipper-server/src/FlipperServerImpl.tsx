@@ -95,10 +95,15 @@ function setProcessState(settings: Settings) {
 
   // emulator/emulator is more reliable than tools/emulator, so prefer it if
   // it exists
-  process.env.PATH =
-    `${['emulator', 'tools', 'platform-tools']
-      .map((directory) => path.resolve(androidHome, directory))
-      .join(':')}:${idbPath}` + `:${process.env.PATH}`;
+  process.env.PATH = [
+    ...['emulator', 'tools', 'platform-tools'].map((directory) =>
+      path.resolve(androidHome, directory),
+    ),
+    idbPath,
+    process.env.PATH,
+  ]
+    .filter(Boolean)
+    .join(path.delimiter);
 }
 
 /**

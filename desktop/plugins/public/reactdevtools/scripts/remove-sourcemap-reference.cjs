@@ -16,8 +16,8 @@
  * It will gracefully fail as Flipper will still work without it, just show the error again.
  */
 
-import fs from 'fs-extra';
-import path from 'path';
+const fs = require('fs-extra');
+const path = require('path');
 
 const SOURCEMAP_REFERENCE =
   '//# sourceMappingURL=importFile.worker.worker.js.map';
@@ -46,6 +46,9 @@ async function main() {
   return 0;
 }
 
-(async () => {
-  process.exit(await main());
-})();
+main().catch((error) => {
+  console.warn(
+    'Skipping optional React DevTools sourcemap patch:',
+    error.message,
+  );
+});

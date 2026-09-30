@@ -38,12 +38,14 @@ import {need as pkgFetch} from 'pkg-fetch';
 import {exec} from 'child_process';
 import fetch from '@adobe/node-fetch-retry';
 import plist from 'simple-plist';
+import {createHash} from 'crypto';
 
 // This needs to be tested individually. As of 2022Q2, node17 is not supported.
 const SUPPORTED_NODE_PLATFORM = 'node16';
 // Node version below is only used for macOS AARCH64 builds as we download
 // the binary directly from Node distribution site instead of relying on pkg-fetch.
 const NODE_VERSION = 'v16.15.0';
+const WINDOWS_NODE_VERSION = 'v24.21.0';
 
 enum BuildPlatform {
   LINUX = 'linux',
@@ -62,7 +64,9 @@ const WINDOWS_STARTUP_SCRIPT = `@echo off
 setlocal
 set "THIS_DIR=%~dp0"
 cd /d "%THIS_DIR%"
-flipper-runtime.exe ./server %*
+if exist "%LOCALAPPDATA%\\Android\\Sdk\\platform-tools\\adb.exe" set "PATH=%LOCALAPPDATA%\\Android\\Sdk\\platform-tools;%PATH%"
+if exist "%ProgramFiles%\\Git\\usr\\bin\\openssl.exe" set "PATH=%ProgramFiles%\\Git\\usr\\bin;%PATH%"
+"%THIS_DIR%flipper-runtime.exe" "%THIS_DIR%server.js" %*
 `;
 
 // eslint-disable-next-line node/no-sync
@@ -589,6 +593,39 @@ async function setRuntimeAppIcon(binaryPath: string): Promise<void> {
 }
 
 async function installNodeBinary(outputPath: string, platform: BuildPlatform) {
+  if (platform === BuildPlatform.WINDOWS) {
+    const base = `https://nodejs.org/dist/${WINDOWS_NODE_VERSION}`;
+    const [binaryResponse, hashesResponse, licenseResponse] = await Promise.all(
+      [
+        fetch(`${base}/win-x64/node.exe`),
+        fetch(`${base}/SHASUMS256.txt`),
+        fetch(
+          `https://raw.githubusercontent.com/nodejs/node/${WINDOWS_NODE_VERSION}/LICENSE`,
+        ),
+      ],
+    );
+    if (!binaryResponse.ok || !hashesResponse.ok || !licenseResponse.ok) {
+      throw new Error('Unable to download the Windows Node.js runtime');
+    }
+    const binary = await binaryResponse.buffer();
+    const expected = (await hashesResponse.text())
+      .split('\n')
+      .find((line) => line.trim().endsWith(' win-x64/node.exe'))
+      ?.trim()
+      .split(/\s+/)[0];
+    if (
+      !expected ||
+      createHash('sha256').update(binary).digest('hex') !== expected
+    ) {
+      throw new Error('Windows Node.js runtime checksum mismatch');
+    }
+    await fs.writeFile(outputPath, binary);
+    await fs.writeFile(
+      path.join(path.dirname(outputPath), 'NODE-LICENSE'),
+      await licenseResponse.text(),
+    );
+    return;
+  }
   /**
    * Below is a temporary patch that doesn't use pkg-fetch to
    * download a node binary for macOS arm64.

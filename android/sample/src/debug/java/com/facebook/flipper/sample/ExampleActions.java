@@ -28,7 +28,7 @@ public final class ExampleActions {
 
     final Request request =
         new Request.Builder()
-            .url("https://demo9512366.mockable.io/SonarPost")
+            .url("https://httpbin.org/post")
             .post(formBody)
             .build();
 

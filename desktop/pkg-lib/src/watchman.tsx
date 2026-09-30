@@ -27,7 +27,13 @@ export default class Watchman {
     this.client = new Client();
     this.client.setMaxListeners(250);
     await new Promise<void>((resolve, reject) => {
+      let failed = false;
       const onError = (err: Error) => {
+        if (failed) {
+          return;
+        }
+        failed = true;
+        clearTimeout(timeouthandle);
         // TODO: Fix this the next time the file is edited.
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         this.client!.removeAllListeners('error');
@@ -50,6 +56,9 @@ export default class Watchman {
       this.client!.capabilityCheck(
         {optional: [], required: ['relative_root']},
         (error) => {
+          if (failed) {
+            return;
+          }
           if (error) {
             onError(error);
             return;
@@ -59,6 +68,9 @@ export default class Watchman {
           this.client!.command(
             ['watch-project', this.rootDir],
             (error, resp) => {
+              if (failed) {
+                return;
+              }
               if (error) {
                 onError(error);
                 return;

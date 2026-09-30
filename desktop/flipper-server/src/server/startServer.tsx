@@ -50,10 +50,6 @@ const verifyAuthToken = (req: http.IncomingMessage): boolean => {
     token = req.headers['x-access-token'] as string;
   }
 
-  if (!isProduction()) {
-    console.info('[conn] verifyAuthToken -> token', token);
-  }
-
   if (!token) {
     console.warn('[conn] A token is required for authentication');
     tracker.track('server-auth-token-verification', {

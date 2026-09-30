@@ -9,6 +9,9 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_VERBOSE_MAKEFILE on)
 
+# Apply to Flipper and the native dependencies built in subdirectories.
+set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-z,max-page-size=16384 -Wl,-z,common-page-size=16384")
+
 set(PACKAGE_NAME      "flipper")
 
 add_compile_options(-DFLIPPER_OSS=1

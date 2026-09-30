@@ -26,6 +26,15 @@ android {
 }
 
 task prepare(dependsOn: [prepareAllLibs]) {
+    doLast {
+        if (org.gradle.internal.os.OperatingSystem.current().isWindows()) {
+            // Windows developer mode/admin privileges are not required for a build.
+            def cmakeFile = file('external/LibEvent/libevent-2.1.11-stable/cmake/AddEventLibrary.cmake')
+            def original = cmakeFile.getText('UTF-8')
+            def patched = original.replace('-E create_symlink', '-E copy_if_different')
+            if (patched != original) cmakeFile.setText(patched, 'UTF-8')
+        }
+    }
 }
 
 build.dependsOn prepare

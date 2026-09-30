@@ -6,4 +6,4 @@
  */
 
 configurations.maybeCreate("default")
-artifacts.add("default", file('inspection-1.0.0.aar'))
+artifacts.add("default", rootProject.file('android/third-party/generated-16k/inspection-16k.aar'))
