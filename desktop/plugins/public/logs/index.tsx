@@ -12,212 +12,98 @@ import {
   DeviceLogEntry,
   usePlugin,
   createDataSource,
-  dataTablePowerSearchOperators,
-  DataTableColumn,
-  DataTable,
-  theme,
-  DataTableManager,
   createState,
-  useValue,
-  DataFormatter,
-  EnumLabels,
-  SearchExpressionTerm,
 } from 'flipper-plugin';
-import {
-  PlayCircleOutlined,
-  PauseCircleOutlined,
-  DeleteOutlined,
-} from '@ant-design/icons';
-import React, {createRef, CSSProperties} from 'react';
-import {Badge, Button} from 'antd';
-
-import {baseRowStyle, logTypes} from './logTypes';
+import React from 'react';
+import {LogConsole, ConsoleActions} from './LogConsole';
+import {defaultFilters, formatLogEntry, matchesLog} from './logText';
+import {createPackageFilter} from './packageFilter';
+import {defaultFormat, normalizeFormat} from './logFormat';
+import {compileLogQuery} from './logQuery';
+import {resolveImportedPackages} from './importPackages';
 
 export type ExtendedLogEntry = DeviceLogEntry & {
   count: number;
-  pidStr: string; //for the purposes of inferring (only supports string type)
+  pidStr: string;
+  processName?: string;
+  processNameInferred?: boolean;
 };
-
-const logLevelEnumLabels = Object.entries(logTypes).reduce(
-  (res, [key, {label}]) => {
-    res[key] = label;
-    return res;
-  },
-  {} as EnumLabels,
-);
-
-function createColumnConfig(
-  _os: 'iOS' | 'Android' | 'Metro',
-): DataTableColumn<ExtendedLogEntry>[] {
-  return [
-    {
-      key: 'type',
-      title: 'Level',
-      width: 30,
-      onRender(entry) {
-        return entry.count > 1 ? (
-          <Badge
-            count={entry.count}
-            size="small"
-            style={{
-              color: theme.white,
-              background:
-                (logTypes[entry.type]?.style as any)?.color ??
-                theme.textColorSecondary,
-            }}
-          />
-        ) : (
-          logTypes[entry.type]?.icon
-        );
-      },
-      powerSearchConfig: {
-        type: 'enum',
-        enumLabels: logLevelEnumLabels,
-      },
-    },
-    {
-      key: 'date',
-      title: 'Time',
-      width: 120,
-      powerSearchConfig: {
-        type: 'dateTime',
-      },
-    },
-    {
-      key: 'pidStr',
-      title: 'PID',
-      width: 60,
-      visible: true,
-      powerSearchConfig: {
-        type: 'enum',
-        inferEnumOptionsFromData: true,
-      },
-    },
-    {
-      key: 'tid',
-      title: 'TID',
-      width: 60,
-      visible: false,
-    },
-    {
-      key: 'tag',
-      title: 'Tag',
-      width: 160,
-      powerSearchConfig: {
-        type: 'enum',
-        inferEnumOptionsFromData: true,
-      },
-    },
-    {
-      key: 'app',
-      title: 'App',
-      width: 160,
-      visible: false,
-    },
-    {
-      key: 'message',
-      title: 'Message',
-      wrap: true,
-      formatters: [
-        DataFormatter.truncate(400),
-        DataFormatter.prettyPrintJson,
-        DataFormatter.linkify,
-      ],
-    },
-  ];
-}
-
-function getRowStyle(entry: DeviceLogEntry): CSSProperties | undefined {
-  return (logTypes[entry.type]?.style as any) ?? baseRowStyle;
-}
-
-const powerSearchInitialState: SearchExpressionTerm[] = [
-  {
-    field: {
-      key: 'type',
-      label: 'Level',
-    },
-    operator:
-      dataTablePowerSearchOperators.enum_set_is_any_of(logLevelEnumLabels),
-    searchValue: Object.entries(logTypes)
-      .filter(([_, item]) => item.enabled)
-      .map(([key]) => key),
-  },
-];
 
 export function devicePlugin(client: DevicePluginClient) {
   const rows = createDataSource<ExtendedLogEntry>([], {
     limit: 200000,
     persist: 'logs',
-    indices: [['pidStr'], ['tag']], //there are for inferring enum types
   });
+  // Receive metadata updates for retained events as well as newly appended logs.
+  // The console bounds its own rendered page separately.
+  rows.view.setWindow(0, Infinity);
   const isPaused = createState(true);
-  const tableManagerRef = createRef<
-    undefined | DataTableManager<ExtendedLogEntry>
-  >();
+  const filters = createState(defaultFilters);
+  const format = createState(defaultFormat, {
+    persist: 'logcat-format-v1',
+    persistToLocalStorage: true,
+  });
+  format.set(normalizeFormat(format.get()));
+  const packageFilter = createPackageFilter(client, rows, filters);
+  const consoleRef: {current: ConsoleActions | null} = {current: null};
+  const queryError = createState('');
+  function applyFilters(value: typeof defaultFilters) {
+    try {
+      const predicate =
+        value.query === undefined
+          ? (entry: ExtendedLogEntry) => matchesLog(entry, value)
+          : compileLogQuery(value.query, value.packageName);
+      rows.view.setFilter(predicate);
+      queryError.set('');
+    } catch (error) {
+      queryError.set((error as Error).message);
+    }
+  }
+  applyFilters(filters.get());
+  const unsubscribeFilters = filters.subscribe(applyFilters);
+  client.onReady(() => {
+    if (client.device.isArchived && client.device.os === 'Android') {
+      const entries = rows.records();
+      const resolved = resolveImportedPackages(entries);
+      if (resolved.some((entry, index) => entry !== entries[index])) {
+        rows.deserialize(resolved);
+      }
+    }
+  });
 
   client.onDeepLink((payload: unknown) => {
     if (typeof payload === 'string') {
-      tableManagerRef.current?.setSearchExpression(powerSearchInitialState);
-      // timeout as we want to await restoring any previous scroll position first, then scroll to them
-      setTimeout(() => {
-        let hasMatch = false;
-        rows.view.output(0, rows.view.size).forEach((row, index) => {
-          if (row.message.includes(payload)) {
-            tableManagerRef.current?.selectItem(index, hasMatch);
-            hasMatch = true;
-          }
-        });
-      }, 500);
+      filters.set({
+        ...defaultFilters,
+        packageName: filters.get().packageName,
+        level: 'all',
+        search: payload,
+      });
     }
   });
 
   client.addMenuEntry(
-    {
-      action: 'clear',
-      handler: clearLogs,
-      accelerator: 'ctrl+l',
-    },
-    {
-      action: 'createPaste',
-      handler: createPaste,
-    },
-    {
-      action: 'goToBottom',
-      handler: goToBottom,
-    },
+    {action: 'clear', handler: clearLogs, accelerator: 'ctrl+l'},
+    {action: 'createPaste', handler: createPaste},
+    {action: 'goToBottom', handler: () => consoleRef.current?.goToBottom()},
   );
 
   let logDisposer: (() => void) | undefined;
-
   function resumePause() {
     if (isPaused.get() && client.device.isConnected) {
-      // start listening to the logs
       isPaused.set(false);
-      logDisposer = client.onDeviceLogEntry((entry: DeviceLogEntry) => {
-        const lastIndex = rows.size - 1;
-        const previousRow = rows.get(lastIndex);
-        if (
-          previousRow &&
-          previousRow.message === entry.message &&
-          previousRow.tag === entry.tag &&
-          previousRow.type === entry.type
-        ) {
-          rows.update(lastIndex, {
-            ...previousRow,
-            pidStr: previousRow.pid.toString(),
-            count: previousRow.count + 1,
-          });
-        } else {
-          rows.append({
-            ...entry,
-            pidStr: entry.pid.toString(),
-            count: 1,
-          });
-        }
+      logDisposer = client.onDeviceLogEntry((entry) => {
+        // Keep every event, including repeated messages and different processes.
+        rows.append({
+          ...entry,
+          pidStr: String(entry.pid),
+          count: 1,
+          processName: packageFilter.processName(entry.pid),
+        });
       });
     } else {
       logDisposer?.();
+      logDisposer = undefined;
       isPaused.set(true);
     }
   }
@@ -227,68 +113,49 @@ export function devicePlugin(client: DevicePluginClient) {
       await client.device.clearLogs();
     }
     rows.clear();
-    tableManagerRef.current?.clearSelection();
+  }
+  async function reloadLogs() {
+    if (!client.device.isConnected) return;
+    if (!isPaused.get()) resumePause();
+    resumePause();
+    await packageFilter.refresh();
   }
 
   function createPaste() {
-    let selection = tableManagerRef.current?.getSelectedItems();
-    if (!selection?.length) {
-      selection = rows.view.output(0, rows.view.size);
-    }
-    if (selection?.length) {
-      client.createPaste(JSON.stringify(selection, null, 2));
+    const text =
+      consoleRef.current?.getSelectedText() ||
+      rows.view
+        .output(0, rows.view.size)
+        .map((entry, index, entries) =>
+          formatLogEntry(entry, format.get(), entries[index - 1]),
+        )
+        .join('');
+    if (text) {
+      client.createPaste(text);
     }
   }
 
-  function goToBottom() {
-    tableManagerRef?.current?.selectItem(rows.view.size - 1);
-  }
-
-  // start listening to the logs
+  client.onDestroy(() => {
+    logDisposer?.();
+    unsubscribeFilters();
+  });
   resumePause();
-
-  const columns = createColumnConfig(client.device.os as any);
-
   return {
-    columns,
-    isConnected: client.device.isConnected,
-    isPaused,
-    tableManagerRef,
     rows,
+    filters,
+    queryError,
+    format,
+    packageFilter,
+    isPaused,
+    consoleRef,
+    connected: client.device.connected,
     clearLogs,
+    reloadLogs,
     resumePause,
   };
 }
 
 export function Component() {
   const plugin = usePlugin(devicePlugin);
-  const paused = useValue(plugin.isPaused);
-  return (
-    <DataTable<ExtendedLogEntry>
-      dataSource={plugin.rows}
-      columns={plugin.columns}
-      enableAutoScroll
-      enableMultiPanels
-      onRowStyle={getRowStyle}
-      enableHorizontalScroll={false}
-      extraActions={
-        plugin.isConnected ? (
-          <>
-            <Button
-              type="ghost"
-              title={`Click to ${paused ? 'resume' : 'pause'} the log stream`}
-              danger={paused}
-              onClick={plugin.resumePause}>
-              {paused ? <PlayCircleOutlined /> : <PauseCircleOutlined />}
-            </Button>
-            <Button type="ghost" title="Clear logs" onClick={plugin.clearLogs}>
-              <DeleteOutlined />
-            </Button>
-          </>
-        ) : undefined
-      }
-      tableManagerRef={plugin.tableManagerRef}
-      powerSearchInitialState={powerSearchInitialState}
-    />
-  );
+  return <LogConsole plugin={plugin} />;
 }

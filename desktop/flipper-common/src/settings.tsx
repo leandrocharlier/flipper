@@ -29,7 +29,7 @@ export type Settings = {
    */
   enablePrefetching: Tristate;
   idbPath: string;
-  darkMode: 'dark' | 'light' | 'system';
+  darkMode: 'dark' | 'island-dark' | 'light' | 'system';
   showWelcomeAtStartup: boolean;
   suppressPluginErrors: boolean;
   persistDeviceData: boolean;

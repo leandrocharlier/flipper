@@ -79,6 +79,11 @@ class SettingsSheet extends Component<Props, State> {
     reportUsage('settings:opened');
   }
 
+  cancelChanges = () => {
+    loadTheme(this.props.settings.darkMode);
+    this.props.onHide();
+  };
+
   applyChanges = async () => {
     this.props.updateSettings(this.state.updatedSettings);
     this.props.updateLauncherSettings(this.state.updatedLauncherSettings);
@@ -108,7 +113,7 @@ class SettingsSheet extends Component<Props, State> {
       <Modal
         open
         centered
-        onCancel={this.props.onHide}
+        onCancel={this.cancelChanges}
         width={570}
         title="Settings"
         footer={footer}
@@ -291,7 +296,8 @@ class SettingsSheet extends Component<Props, State> {
               }));
               loadTheme(event.target.value);
             }}>
-            <Radio.Button value="dark">Dark</Radio.Button>
+            <Radio.Button value="dark">Flipper Dark</Radio.Button>
+            <Radio.Button value="island-dark">Island Dark</Radio.Button>
             <Radio.Button value="light">Light</Radio.Button>
             <Radio.Button value="system">Use System Setting</Radio.Button>
           </Radio.Group>
@@ -354,7 +360,7 @@ class SettingsSheet extends Component<Props, State> {
 
     const footer = (
       <>
-        <Button onClick={this.props.onHide}>Cancel</Button>
+        <Button onClick={this.cancelChanges}>Cancel</Button>
         <Button
           disabled={settingsPristine || forcedRestart}
           onClick={this.applyChangesWithoutRestart}>

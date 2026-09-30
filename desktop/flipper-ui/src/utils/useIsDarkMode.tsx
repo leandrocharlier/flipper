@@ -12,7 +12,7 @@ import {Settings} from 'flipper-common';
 
 export function shouldUseDarkMode(theme: Settings['darkMode']) {
   let shouldUseDarkMode = false;
-  if (theme === 'dark') {
+  if (theme === 'dark' || theme === 'island-dark') {
     shouldUseDarkMode = true;
   } else if (theme === 'light') {
     shouldUseDarkMode = false;
@@ -20,7 +20,7 @@ export function shouldUseDarkMode(theme: Settings['darkMode']) {
     shouldUseDarkMode = !!(
       window.flipperConfig.theme === 'dark' ||
       (window.flipperConfig.theme === 'system' &&
-        window.matchMedia?.('(prefers-color-scheme: dark)'))
+        window.matchMedia?.('(prefers-color-scheme: dark)').matches)
     );
   }
 

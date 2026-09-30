@@ -7,7 +7,7 @@
  * @format
  */
 
-import React from 'react';
+import React, {useEffect} from 'react';
 import {Button, Dropdown, Menu, Radio, Tooltip, Typography} from 'antd';
 import {
   AppleOutlined,
@@ -57,6 +57,13 @@ export function AppSelector({
   const {selectedDevice, clients, uninitializedClients, selectedAppId} =
     useStore((state) => state.connections);
   useValue(selectedDevice?.connected, false); // subscribe to future archived state changes
+  const selectedPackage = selectedAppId
+    ? clients.get(selectedAppId)?.query.app_id ?? null
+    : null;
+  useEffect(() => {
+    // Device plugins keep one instance per device while the selected app changes.
+    selectedDevice?.selectedAppId.set(selectedPackage);
+  }, [selectedDevice, selectedPackage]);
 
   const onSelectDevice = useTrackedCallback(
     'select-device',

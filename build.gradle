@@ -23,6 +23,25 @@ plugins {
     id 'com.github.ben-manes.versions' version '0.47.0'
 }
 
+// local.properties is ignored by Git. Load only publishing credentials, leaving
+// explicit Gradle properties (including CI environment variables) with priority.
+def localPublishingFile = rootProject.file('local.properties')
+if (localPublishingFile.isFile()) {
+    def localPublishingProperties = new Properties()
+    localPublishingFile.withInputStream { localPublishingProperties.load(it) }
+    [
+        'mavenCentralUsername',
+        'mavenCentralPassword',
+        'signing.keyId',
+        'signing.password',
+        'signing.secretKeyRingFile'
+    ].each { key ->
+        if (!rootProject.hasProperty(key) && localPublishingProperties.containsKey(key)) {
+            rootProject.ext.set(key, localPublishingProperties.getProperty(key))
+        }
+    }
+}
+
 ext.isSnapshot = { VERSION_NAME.endsWith('-SNAPSHOT') }
 ext.isRelease = { ['publish', 'publishToMavenLocal'].any { gradle.startParameter.taskNames.contains(it) } }
 

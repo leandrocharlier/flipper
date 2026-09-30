@@ -71,3 +71,6 @@ website/src/embedded-pages/docs/plugins/
 # Downloaded sources and local validation artifacts.
 /work/
 /android/third-party/generated-16k/
+
+# Local publishing keys, agent files, and signing checks. Never commit these.
+/.publishing/

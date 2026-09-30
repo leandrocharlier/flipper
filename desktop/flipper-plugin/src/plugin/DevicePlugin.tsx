@@ -33,6 +33,8 @@ export interface Device {
   readonly serial: string;
   readonly deviceType: DeviceType;
   readonly connected: Atom<boolean>;
+  /** Package/bundle ID of the app selected in the desktop, when available. */
+  readonly selectedAppId?: ReadOnlyAtom<string | null>;
   executeShell(command: string): Promise<string>;
   addLogListener(callback: DeviceLogListener): Symbol;
   addCrashListener(callback: CrashLogListener): Symbol;

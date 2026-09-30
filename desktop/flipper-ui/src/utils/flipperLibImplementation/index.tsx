@@ -39,6 +39,7 @@ import {importFile} from '../importFile';
 import {exportFile, exportFileBinary} from '../exportFile';
 import {getFlipperServer, getFlipperServerConfig} from '../../flipperServer';
 import {GK} from '../GK';
+import {shouldUseDarkMode} from '../useIsDarkMode';
 
 export function initializeFlipperLibImplementation(
   store: Store,
@@ -162,15 +163,9 @@ export function initializeFlipperLibImplementation(
     },
     DetailsSidebarImplementation: DetailSidebarImpl,
     settings() {
-      const darkModeState = store.getState().settingsState.darkMode;
-      let isDarkMode = darkModeState === 'dark';
-      if (
-        darkModeState === 'system' &&
-        window.matchMedia('(prefers-color-scheme:dark)').matches
-      ) {
-        isDarkMode = true;
-      }
-      return {isDarkMode};
+      return {
+        isDarkMode: shouldUseDarkMode(store.getState().settingsState.darkMode),
+      };
     },
   });
 }

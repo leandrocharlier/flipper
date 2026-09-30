@@ -32,6 +32,26 @@ this fork.
   also been updated; plugin archives reject traversal paths and links.
 - Fixes for missing Watchman on Windows and for Logs disappearing when an app
   connects before ADB finishes registering its device.
+- Logs now uses a Logcat-style text viewer with free text selection, severity
+  colors, full multiline messages, search and level/tag/PID filters. Follow mode
+  holds the view while selecting text; older history is available in blocks of
+  2,000 events. See the [Logs guide](desktop/plugins/public/logs/docs/overview.mdx).
+  Editing or clearing filters preserves the reading position and surrounding
+  logs, including when no text is selected. Soft wrap is off by default.
+- Android Logs can filter by package ID and follow the app selected in Flipper,
+  refreshing process IDs after restarts. The Logcat Format panel configures
+  visible fields, timestamp style, widths and colors, with saved preferences.
+  Imported Android sessions can recover missing package names from explicit
+  ActivityManager process lifecycles, with inferred names marked in tooltips.
+- Choose **Flipper Dark** or **Island Dark** in **More → Settings → Theme Selection**.
+  Island Dark uses Android Studio's Islands palette; the original Flipper Dark,
+  light and system choices remain available. Apply saves the choice; Cancel
+  restores the previous palette.
+- Logs bundles JetBrains Mono with native text selection. Island Dark uses blue
+  selection highlighting while preserving the text colors.
+- Logs has one query field with completions (`package:mine`, `tag:`, `level:`,
+  `message:`, `process:`, `pid:` and `tid:`) and a compact sidebar for capture,
+  clearing, reloading, scrolling and formatting.
 
 See [Windows build and tests](desktop/BUILDING-WINDOWS.md) and
 [Android 16 KB build and tests](android/BUILDING-16KB.md). Windows and an Android

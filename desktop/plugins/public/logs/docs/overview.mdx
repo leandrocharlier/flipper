@@ -1,23 +1,50 @@
-import useBaseUrl from '@docusaurus/useBaseUrl';
+The Logs plugin displays device logs as selectable, monospaced text. On Android it reads Logcat through ADB, without adding an SDK plugin to your app.
 
-The Logs plugin shows device logs without any additional setup. This is a device plugin, which means it's not tied to any specific app and there is no additional setup needed to see the logs.
+Each event includes its timestamp, PID-TID, severity, tag and complete message. Severity colors help distinguish errors and warnings. Multiline messages and stack traces retain their line breaks, and repeated events remain separate.
 
-The following screenshot shows an example of a device log obtained via the Logs plugin.
+## Package filtering on Android
 
-<img alt="Logs plugin" src={useBaseUrl("img/logs.png")} />
+Use `package:com.example.app` in the single query field to filter by the process that emitted an event. An exact package includes its main process and subprocesses named `package:service`; similarly prefixed packages such as `package.debug` are excluded.
 
-## Plugin functionality
+`package:mine` follows the app selected in Flipper's device/app menu. This is included in the default query when an app reports its package ID. While an app reconnects, its last package remains selected. Type an explicit package to filter another app, or remove the package term to see all packages. If an older client does not report its package ID, enter it explicitly.
 
-### Filtering
+The viewer refreshes Android's process list once per second while Logs is active, so restarting an app does not require copying a new PID. PID/TID, tag, text and level filters can still be combined with the package filter. Package and process names are retained in exported logs once resolved. Processes that terminate before a lookup, and older imported sessions without process metadata, may have no known package. Names not following Android's usual `package` / `package:service` convention cannot be associated with a package by this lookup. This desktop feature does not require a new Android SDK dependency.
 
-The search bar can be used to search for logs and act as a filter for certain types.
+## Display format
 
-From the context menu on the table headers, you can show additional information, such as timestamp, PID or TID.
+When importing an archived Android session, explicit ActivityManager process-start records can recover missing package/process names for subsequent events from that PID. Process termination, PID reuse and conflicting saved identities end that association. Recovered names have an explanatory tooltip; arbitrary package mentions and the selected app are not used. Unknown identities stay blank, and saved identities take priority. New exports preserve both device-supplied identities and the provenance of recovered names, so package filtering works offline.
 
-Clicking on a tag, PID or TID in the table filters only for logs with the same value.
+Open **Logcat Format** to configure timestamp visibility and format, PID/TID, tag, package name, process name and level. Set minimum character widths, hide repeated tags/names, and toggle tag or message colors. The message itself remains complete and selectable.
 
-### Expression Watcher
+The dialog includes a live preview, Standard and Compact presets, Restore defaults, Apply and Cancel. Applied preferences are saved locally for future sessions. Copying and Create Paste follow the displayed format. Package name omits the `:service` suffix; the optional Process name field shows the complete name.
 
-The Expression Watcher in the sidebar can be used to 'watch' for certain logs to happen and count how often they occur. An expression can be a simple string, or a regular expression, matched against the logs.
+## Reading and copying
 
-When the notify checkbox is enabled, Flipper sends notifications once the log is being processed. This lets you know when the 'watcher' triggered, even if Flipper is in the background.
+Drag to select characters across multiple events, then use Ctrl+C (Cmd+C on macOS). Ctrl+A (Cmd+A) selects the displayed text when the viewer has focus. Clicking the text or scrolling upward holds the view while capture continues, so incoming logs do not disrupt a selection. The **Go to bottom** icon returns to the newest events and resumes following. **Soft wrap** toggles line wrapping and is off by default.
+
+Editing, widening or clearing a query keeps your reading position, even without a text selection. Selected text anchors its specific occurrence; otherwise the first visible event is used. If the event is excluded, the nearest matching event in the retained history is shown. The original position survives intermediate queries with no matches. Scrolling or selecting another event establishes a new position; Go to bottom resumes following the newest logs.
+
+The viewer displays up to 2,000 events at a time. The **Older logs** and **Newer logs** arrow icons browse the retained history, which holds up to 200,000 events. Search covers the entire retained history, including events outside the current page. The Create Paste action uses selected text, or all matching events when no text is selected.
+
+The footer shows the displayed range and the total number of matching events. A smaller displayed range is a page of the history, not truncation of an event or loss of imported data. Use `level:all` to include verbose events too.
+
+## Filtering and capture
+
+The query field offers completions while typing and on **Ctrl+Space**, including known tags, packages, processes and IDs. Examples:
+
+```text
+package:mine level:warn
+package:com.example.app tag:Network -message:success
+tag:"Network Client" message:"timed out"
+pid:1234 tid:1235
+```
+
+Supported keys are `package`, `tag`, `process`, `message`, `level`, `pid` and `tid`. Prefix a key with `-` to exclude matches. Text matching is case-insensitive; package IDs are exact and case-sensitive. Level includes the selected severity and higher; `level:all` includes Unknown and Verbose. An empty query shows all retained events. Unqualified words search message and metadata. Quotes allow phrases; repeated positive keys are OR alternatives, with different keys and exclusions combined as AND.
+
+`level:debug` therefore shows DEBUG, INFO, WARN, ERROR and FATAL. For **only DEBUG**, use `level:debug -level:info`; for **INFO and higher**, use `level:info`. Negating a level excludes that severity **and higher**, too. The input and suggestions explain this minimum-level behavior.
+
+These common forms are inspired by [Android Studio Logcat queries](https://developer.android.com/studio/debug/logcat#key-value-search). This viewer does not implement the entire Studio language: regex, explicit boolean operators, parentheses, age and saved query names are not supported. Here `package:mine` means the app selected in Flipper. Incomplete or invalid expressions show an explanation and keep the last valid filter until corrected.
+
+The left toolbar has labeled tooltips for **Clear logs**, **Pause/Resume capture**, **Reload logs**, **Go to bottom**, **Soft wrap**, history navigation and **Logcat Format**. Reload reattaches capture, refreshes process IDs and resumes following while retaining history and the query. Clear removes the retained history and clears the connected device's log buffer.
+
+This view uses text filters instead of the previous table's Power Search expressions. Existing exported Flipper sessions can still be imported; repeat counts from older sessions are shown in the text.

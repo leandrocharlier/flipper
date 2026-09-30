@@ -122,6 +122,32 @@ application. This work also
 does not constitute a complete security upgrade of all the archived project's
 dependencies.
 
+## Logs text viewer checks
+
+From `desktop`, run the Logs unit and component tests:
+
+```powershell
+npx.cmd --yes yarn@1.22.22 test --runInBand plugins/public/logs/__tests__/logs.node.tsx
+```
+
+After building the Windows server, start one Android emulator and close other
+Flipper instances. From `desktop/electron`, run:
+
+```powershell
+.\node_modules\.bin\electron.cmd test/logs.cjs
+```
+
+The integration test sends device logs through ADB and checks multiline text,
+severity colors, native Ctrl+C across events, selection stability, follow,
+search/PID/tag filters, wrapping, capture pause/resume, repeated messages and
+clearing. It clears the emulator's log buffer and copies test text to the
+clipboard. Results and a screenshot are saved in `work/logs-electron`. Set
+`$env:FLIPPER_LEAVE_OPEN='1'` to retain the tested window for manual inspection.
+
+Set `$env:FLIPPER_PACKAGE_E2E='1'` with the existing full Android sample installed
+to also check automatic package selection, the package column and PID discovery
+after restarting the sample. The test also exercises the Logcat Format dialog.
+
 ## Artifact sizes for the dependency update
 
 The 0.273.2 maintenance build was compared with the previously tested 0.273.1

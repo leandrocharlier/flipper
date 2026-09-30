@@ -98,6 +98,7 @@ export default class BaseDevice implements Device {
   crashListeners: Map<Symbol, CrashLogListener> = new Map();
 
   readonly connected = createState(true);
+  readonly selectedAppId = createState<string | null>(null);
 
   // if imported, stores the original source location
   source = '';
