@@ -10,6 +10,9 @@
 import MacDevice from './MacDevice';
 import WindowsDevice from './WindowsDevice';
 import {FlipperServerImpl} from '../../FlipperServerImpl';
+import {ServerDevice} from '../ServerDevice';
+
+class LinuxDevice extends ServerDevice {}
 
 export default (flipperServer: FlipperServerImpl) => {
   let device;
@@ -17,6 +20,15 @@ export default (flipperServer: FlipperServerImpl) => {
     device = new MacDevice(flipperServer);
   } else if (process.platform === 'win32') {
     device = new WindowsDevice(flipperServer);
+  } else if (process.platform === 'linux') {
+    device = new LinuxDevice(flipperServer, {
+      serial: '',
+      deviceType: 'physical',
+      title: 'Linux',
+      os: 'Linux',
+      icon: 'server',
+      features: {screenCaptureAvailable: false, screenshotAvailable: false},
+    });
   } else {
     return;
   }

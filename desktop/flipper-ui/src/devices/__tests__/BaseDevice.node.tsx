@@ -173,6 +173,27 @@ test('ios physical device compatibility', () => {
   expect(device.supportsPlugin(androidEmulatorDevicePlugin)).toBeFalsy();
 });
 
+test.each(['Windows', 'MacOS', 'Linux'] as const)(
+  '%s remains selectable when its host plugin has not been enabled',
+  (os) => {
+    const device = new TestDevice('', 'physical', 'test computer', os);
+    const plugin = new _SandyPluginDefinition(
+      TestUtils.createMockPluginDetails({
+        id: 'MockAPI',
+        name: 'flipper-plugin-mock-api',
+        pluginType: 'device',
+        supportedDevices: [{os, archived: false}],
+      }),
+      createDeviceTestPluginModule(),
+    );
+    device.loadDevicePlugins(new Map([[plugin.id, plugin]]), new Set());
+    expect(device.hasDevicePlugins).toBe(true);
+    const phone = new TestDevice('phone', 'physical', 'phone', 'Android');
+    phone.loadDevicePlugins(new Map([[plugin.id, plugin]]), new Set());
+    expect(phone.hasDevicePlugins).toBe(false);
+  },
+);
+
 test('archived device compatibility', () => {
   const device = new ArchivedDevice({
     serial: 'serial',

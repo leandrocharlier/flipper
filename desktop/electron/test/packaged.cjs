@@ -16,7 +16,7 @@ const executable = process.platform === 'win32'
 const delay = ms => new Promise(resolve=>setTimeout(resolve,ms));
 const log = fs.openSync(path.join(output, 'process.log'), 'w');
 const profile = fs.mkdtempSync(path.join(output,'profile-'));
-const child = spawn(executable, ['--remote-debugging-port=19342', `--user-data-dir=${profile}`], {stdio:['ignore',log,log], windowsHide:true});
+const child = spawn(executable, ['--remote-debugging-port=19342', `--user-data-dir=${profile}`], {stdio:['ignore',log,log], windowsHide:true, env: {...process.env, FLIPPER_MOCK_API_DATA_DIR: path.join(profile, 'mock-api')}});
 let socket;
 const result = {platform:process.platform,arch:process.arch,version};
 let processError;
@@ -61,6 +61,8 @@ async function wait(expression,label) {
   await run(`Array.from(document.querySelectorAll('.ant-modal button')).find(e=>e.textContent.trim()==='Close')?.click()`);
   assert.equal(await run(`(() => {try{return typeof window.require('node:fs').readFileSync==='function'}catch{return false}})()`),false);
   result.rendererIsolation=true;
+  await require('./mock-api.cjs')({run, wait, send, profile});
+  result.mockApi=true;
   const rows=Array.from({length:4100},(_,i)=>({date:new Date(1700000000000+i).toISOString(),pid:4242,tid:4243,tag:'ReleaseTest',type:i%2?'debug':'info',message:`Synthetic event ${i}\n`,count:1,pidStr:'4242',processName:'com.example.release'}));
   const fixture={fileVersion:'0.273.0',clients:[],pluginStates2:{},deviceScreenshot:null,store:{activeNotifications:[]},device:{deviceType:'physical',os:'Android',serial:'synthetic-release-test',title:'Synthetic release fixture',pluginStates:{DeviceLogs:{logs:rows}}}};
   await run(`(() => {const fixture=${JSON.stringify(fixture)};HTMLInputElement.prototype.click=function(){if(this.type==='file'){const transfer=new DataTransfer();transfer.items.add(new File([JSON.stringify(fixture)],'synthetic.flipper',{type:'application/json'}));this.files=transfer.files;this.dispatchEvent(new Event('change',{bubbles:true}));}};})()`);

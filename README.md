@@ -19,8 +19,8 @@
 This is [Leandro Charlier's maintenance fork](https://github.com/leandrocharlier/flipper)
 of the archived Meta Flipper project. Its current focus is native Android
 debugging, especially **Network and Logs**, with a standalone desktop app.
-Community version **0.3.0** adds native release builds for Windows, macOS (Intel
-and Apple Silicon), and Linux. See [desktop release instructions](desktop/RELEASING.md).
+Community version **1.0.0** includes Mock API and native desktop builds for Windows,
+macOS (Intel and Apple Silicon), and Linux. See [desktop release instructions](desktop/RELEASING.md).
 This fork is independent and is not an official Meta release. The original
 MIT license and copyright notices are retained; see [NOTICE](NOTICE).
 The Maven and CocoaPods badges above refer to upstream packages, not releases of
@@ -63,6 +63,12 @@ x86_64 16 KB emulator are the validation targets. macOS, iOS and ARM device runt
 compatibility require separate testing. The Windows binaries are unsigned.
 This is an incremental maintenance effort: the archived project's entire
 dependency tree has not been modernized or cleared of all security advisories.
+
+Version 1.0.0 includes [Mock API](desktop/plugins/public/mock-api/README.md),
+powered by Mockoon: multiple imported environments, local HTTP/HTTPS servers,
+Start/Stop/reload controls and detection of changes to imported files. Select your
+computer in the device selector to open it. The Android debug sample includes
+HTTP and HTTPS buttons to exercise the local mock servers.
 
 Upstream switched to a browser UI after [v0.239.0](https://github.com/facebook/flipper/releases/tag/v0.239.0).
 This fork packages the newer UI in a desktop window again.

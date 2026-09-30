@@ -338,6 +338,11 @@ export default class BaseDevice implements Device {
     if (!devicePlugins) {
       return;
     }
+    // Keep host devices selectable when their compatible plugin is disabled,
+    // so users can select the computer and enable it from the plugin list.
+    this.hasDevicePlugins = Array.from(devicePlugins.values()).some((plugin) =>
+      this.supportsPlugin(plugin),
+    );
     const plugins = Array.from(devicePlugins.values()).filter((p) =>
       enabledDevicePlugins?.has(p.id),
     );

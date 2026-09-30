@@ -16,4 +16,6 @@ public final class ExampleActions {
   public static void sendGetRequest(OkHttpClient client) {}
 
   public static void sendNotification() {}
+
+  public static void sendMockRequest(android.content.Context context, OkHttpClient client, boolean tls) {}
 }

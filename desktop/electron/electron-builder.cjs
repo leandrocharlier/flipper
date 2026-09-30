@@ -11,7 +11,7 @@ module.exports = {
   afterExtract: './preserve-electron-notices.cjs',
   afterPack: './verify-package.cjs',
   directories: {output: '../../dist/electron'},
-  files: ['main.cjs', 'server-process.cjs', 'platform.cjs', 'package.json', '!node_modules/**/*'],
+  files: ['main.cjs', 'preload.cjs', 'server-process.cjs', 'platform.cjs', 'package.json', '!node_modules/**/*'],
   extraResources: [
     {from: server, to: 'server'},
     {from: path.join(server, 'node_modules'), to: 'server/node_modules'},

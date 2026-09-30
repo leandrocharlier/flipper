@@ -8,10 +8,15 @@
 package com.facebook.flipper.sample;
 
 import android.util.Log;
+import android.app.AlertDialog;
+import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
 import com.facebook.flipper.android.AndroidFlipperClient;
 import com.facebook.flipper.core.FlipperClient;
 import com.facebook.flipper.plugins.example.ExampleFlipperPlugin;
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.FormBody;
@@ -21,6 +26,42 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public final class ExampleActions {
+
+  public static void sendMockRequest(Context context, OkHttpClient client, boolean tls) {
+    final String url = tls ? "https://localhost:3001/hello" : "http://localhost:3000/hello";
+    // Retains the existing Network interceptor. TLS trust is scoped to localhost
+    // in the debug manifest; do not disable certificate or hostname verification.
+    final Call call = client.newBuilder().callTimeout(10, TimeUnit.SECONDS).build()
+        .newCall(new Request.Builder().url(url).build());
+    final AlertDialog dialog = new AlertDialog.Builder(context)
+        .setTitle(tls ? "Mock API HTTPS" : "Mock API HTTP")
+        .setMessage("Requesting " + url + "…")
+        .setPositiveButton("Close", (ignored, which) -> call.cancel())
+        .create();
+    dialog.setOnCancelListener(ignored -> call.cancel());
+    dialog.show();
+    final Handler main = new Handler(Looper.getMainLooper());
+    call.enqueue(new Callback() {
+      @Override
+      public void onFailure(Call ignored, IOException error) {
+        final String message = url + "\n\n" + error.getClass().getSimpleName() + ": " + error.getMessage()
+            + "\n\nStart the example server in Mock API and run adb reverse tcp:"
+            + (tls ? "3001 tcp:3001" : "3000 tcp:3000") + ".";
+        Log.w("MockAPI", message);
+        main.post(() -> { if (dialog.isShowing()) dialog.setMessage(message); });
+      }
+
+      @Override
+      public void onResponse(Call ignored, Response response) throws IOException {
+        try (Response closedResponse = response) {
+          final String body = closedResponse.peekBody(65536).string();
+          final String message = url + "\n\nHTTP " + closedResponse.code() + "\n\n" + body;
+          Log.i("MockAPI", message);
+          main.post(() -> { if (dialog.isShowing()) dialog.setMessage(message); });
+        }
+      }
+    });
+  }
 
   public static void sendPostRequest(OkHttpClient client) {
     final RequestBody formBody =

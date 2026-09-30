@@ -11,6 +11,11 @@ Fork contributions are distributed under the same MIT license.
 This distribution is not an official Meta product and is not endorsed by Meta.
 Names and trademarks belong to their respective owners.
 
+Mock API uses the Mockoon commons and commons-server libraries (MIT license,
+copyright 2017-present Guillaume Monnet). This independent integration is not
+the Mockoon desktop application and is not endorsed by Mockoon. Its license and
+dependency notices are preserved in the desktop distribution's third-party notices.
+
 Third-party software retains its own licenses and copyright notices.
 The desktop packages include THIRD-PARTY-NOTICES.txt for JavaScript dependencies,
 NODE-LICENSE for Node.js and its bundled components, the unmodified JetBrains

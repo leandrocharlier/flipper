@@ -9,6 +9,9 @@ dependencies, then follow `RELEASING.md` for the native package checks.
 The smoke test launches the actual packaged executable, imports 4,100 independently
 generated synthetic logs, exercises filtering/reading position, checks spacing and
 default wrapping, verifies renderer isolation, and verifies process shutdown.
+It also imports two synthetic Mockoon environments using native file selection,
+starts a real mock server, checks external-file change detection, reloads saved
+edits, and stops the server. Mock API tests use an isolated storage directory.
 Private user captures and any data derived from them are forbidden in remote
 tests, source control, release packages and uploaded diagnostics.
 
@@ -17,7 +20,9 @@ tests, source control, release packages and uploaded diagnostics.
 The root suite covers the shared plugin framework, renderer, server, import/export,
 packaging utilities and all existing public plugin suites. Plugin-specific suites
 exist for Logs, Network, Crash Reporter, Databases, Inspector, Navigation,
-Preferences and the Sea Mammals example. This is not a claim of exhaustive code
+Preferences, Mock API and the Sea Mammals example. Mock API exercises real HTTP,
+HTTPS (built-in certificate, PEM/CA and encrypted PFX), request rules/templates,
+proxy/response files, imports, persistence and source watching. This is not a claim of exhaustive code
 coverage or real-device validation of every plugin.
 
 The desktop plugins Cookies, Device CPU, Fresco, Hermes Debugger, KaiOS Graphs,

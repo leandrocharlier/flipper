@@ -1,0 +1,27 @@
+{
+  "$schema": "https://fbflipper.com/schemas/plugin-package/v2.json",
+  "name": "flipper-plugin-mock-api",
+  "id": "MockAPI",
+  "title": "Mock API",
+  "description": "Local mock servers powered by the Mockoon engine, with TLS, rules, templates and proxying.",
+  "version": "0.0.0",
+  "pluginType": "device",
+  "supportedDevices": [
+    {"os": "Windows", "archived": false},
+    {"os": "MacOS", "archived": false},
+    {"os": "Linux", "archived": false}
+  ],
+  "main": "dist/bundle.js",
+  "flipperBundlerEntry": "index.tsx",
+  "serverAddOn": "dist/serverAddOn.js",
+  "flipperBundlerEntryServerAddOn": "serverAddOn.tsx",
+  "license": "MIT",
+  "keywords": ["flipper-plugin"],
+  "icon": "server",
+  "dependencies": {
+    "@mockoon/commons": "9.9.0",
+    "@mockoon/commons-server": "9.9.0"
+  },
+  "devDependencies": {"node-forge": "^1.4.0"},
+  "peerDependencies": {"flipper-plugin": "*"}
+}

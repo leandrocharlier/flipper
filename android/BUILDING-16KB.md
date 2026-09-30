@@ -69,6 +69,42 @@ use OpenSSL's deprecated, still-supported APIs and produce compiler warnings.
 
 ## Validation
 
+### Local Mock API buttons (debug sample)
+
+The existing sample has **Test Mock API HTTP** and **Test Mock API HTTPS** buttons.
+They call `/hello` on localhost ports **3000** and **3001** and display the status
+and body, including non-2xx responses. Requests use the sample's existing Network
+interceptor and appear in Network, Logs (`tag:MockAPI`) and the mock server's Requests.
+
+After installing desktop/plugin dependencies, run from the repository root:
+
+```powershell
+node scripts/create-mock-api-demo.cjs
+./gradlew.bat :sample:assembleDebug
+adb install -r android/sample/build/outputs/apk/debug/sample-debug.apk
+adb reverse tcp:3000 tcp:3000
+adb reverse tcp:3001 tcp:3001
+```
+
+Import `work/mock-api-demo/http.json` and `https.json` into Mock API and start both.
+The helper creates a local certificate with localhost/127.0.0.1 subject alternative
+names, writes its private key only under ignored `work/`, and copies only its
+**public certificate** into the sample's debug resources. Rebuild/reinstall after
+generating a new certificate. The default Mockoon certificate is not used for this
+example because it lacks the subject alternative names required by Android's
+hostname verifier. The debug network-security configuration trusts the generated
+certificate only for localhost/127.0.0.1. Release builds omit these buttons and this
+additional trust; no permissive trust manager or hostname verifier is installed.
+
+The checked-in public certificate lets the sample compile before setup; each new
+checkout should run the helper to create its own local key/certificate pair before
+testing HTTPS. Never commit `work/` or share its private key. The helper preserves an
+existing pair; generate a new one and rebuild the debug APK when it expires.
+With both servers running, `node scripts/test-mock-api-android.cjs` exercises the
+two actual buttons and verifies their response dialogs on the connected device.
+
+### Native alignment
+
 The checker verifies every packaged arm64-v8a/x86_64 `.so` with `llvm-readelf` and
 runs `zipalign -c -P 16`. Also install the APK on a 16 KB emulator/device, confirm
 `adb shell getconf PAGE_SIZE` reports `16384`, exercise the sample screens and

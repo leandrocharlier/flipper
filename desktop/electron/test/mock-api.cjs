@@ -1,0 +1,73 @@
+// Packaged UI test. All environments and requests are generated synthetic data.
+const fs = require('node:fs');
+const path = require('node:path');
+const net = require('node:net');
+const assert = require('node:assert/strict');
+const {BuildEnvironment} = require('../../plugins/public/node_modules/@mockoon/commons');
+
+module.exports = async function testMockApi({run, wait, send, profile}) {
+  const host = process.platform === 'win32' ? 'Windows' : process.platform === 'darwin' ? 'Mac' : 'Linux';
+  await wait(`(() => {
+    const selector=document.querySelector('button[title="Select the device / app to inspect"]');
+    if (!selector?.textContent.includes(${JSON.stringify(host)})) {
+      const device=Array.from(document.querySelectorAll('[role="menuitem"]')).find(e=>e.textContent.trim()===${JSON.stringify(host)});
+      if(device)device.click();else selector?.click();return false;
+    }
+    const item=Array.from(document.querySelectorAll('.ant-menu-item .ant-typography')).find(e=>e.textContent==='Mock API');
+    item?.closest('.ant-menu-item')?.click();
+    return !!document.querySelector('[aria-label="Mock API workspace"]');
+  })()`, 'Mock API plugin did not load');
+  assert.equal(await run(`Array.from(document.querySelectorAll('[aria-label="Mock API workspace"] aside button')).filter(e=>e.textContent.trim().startsWith('Import')).length`),1);
+  const server = net.createServer();
+  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+  const port = server.address().port;
+  await new Promise(resolve => server.close(resolve));
+  const env = JSON.parse(JSON.stringify(BuildEnvironment({hasDefaultRoute:true,port})));
+  env.hostname='127.0.0.1';env.name='Synthetic mock UI';
+  env.routes[0].endpoint='smoke';env.routes[0].responses[0].body='synthetic original';
+  const file = path.join(profile, 'synthetic-mock.json');
+  fs.writeFileSync(file, JSON.stringify(env));
+  const other = JSON.parse(JSON.stringify(BuildEnvironment({hasDefaultRoute:true,port:3000})));
+  other.name='Synthetic second environment';
+  const second = path.join(profile, 'synthetic-second.json');
+  fs.writeFileSync(second,JSON.stringify(other));
+  const root = (await send('DOM.getDocument')).root.nodeId;
+  const {nodeId} = await send('DOM.querySelector',{nodeId:root,selector:'[aria-label="Mock API workspace"] input[type="file"]'});
+  await send('DOM.setFileInputFiles',{nodeId,files:[second,file]});
+  await wait(`document.querySelector('[aria-label="Mock API workspace"]')?.textContent.includes('Synthetic mock UI') && document.querySelector('[aria-label="Response body"]')?.value==='synthetic original'`, 'Native multiple-file import failed');
+  assert.ok(await run(`document.querySelector('[aria-label="Mock API workspace"]').textContent.includes('Synthetic second environment')`));
+  await run(`Array.from(document.querySelectorAll('button')).find(e=>e.textContent.trim()==='Start').click()`);
+  await wait(`!!document.querySelector('button[aria-label="Reload mock server"]')`,'Mock server failed to start');
+  assert.equal(await (await fetch(`http://127.0.0.1:${port}/smoke`)).text(),'synthetic original');
+  env.routes[0].responses[0].body='synthetic file edit';
+  fs.writeFileSync(file,JSON.stringify(env));
+  await wait(`document.body.textContent.includes('Changes detected. Press the reload arrow')`,'External JSON edit was not detected');
+  assert.equal(await (await fetch(`http://127.0.0.1:${port}/smoke`)).text(),'synthetic original');
+  await run(`document.querySelector('button[aria-label="Reload mock server"]').click()`);
+  await wait(`!document.body.textContent.includes('Changes detected. Press the reload arrow')`,'Reload did not clear pending state');
+  assert.equal(await (await fetch(`http://127.0.0.1:${port}/smoke`)).text(),'synthetic file edit');
+  await run(`(() => {const field=document.querySelector('[aria-label="Response body"]');Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype,'value').set.call(field,'synthetic draft edit');field.dispatchEvent(new Event('input',{bubbles:true}));})()`);
+  await wait(`!document.querySelector('button[aria-label="Save environment"]').disabled`,'Editing response did not create a draft');
+  await run(`document.querySelector('button[aria-label="Save environment"]').click()`);
+  await wait(`document.body.textContent.includes('Changes detected. Press the reload arrow')`,'Saved draft did not require reload');
+  assert.equal(await (await fetch(`http://127.0.0.1:${port}/smoke`)).text(),'synthetic file edit');
+  await run(`document.querySelector('button[aria-label="Reload mock server"]').click()`);
+  await wait(`!document.body.textContent.includes('Changes detected. Press the reload arrow')`,'Draft reload failed');
+  assert.equal(await (await fetch(`http://127.0.0.1:${port}/smoke`)).text(),'synthetic draft edit');
+  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+  const nextPort = server.address().port;
+  await new Promise(resolve => server.close(resolve));
+  await run(`(() => {const field=document.querySelector('input[aria-label="Server port"]');Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(field,${JSON.stringify(String(nextPort))});field.dispatchEvent(new Event('input',{bubbles:true}));})()`);
+  await wait(`!document.querySelector('button[aria-label="Save environment"]').disabled`,'Editing port did not create a draft');
+  await run(`document.querySelector('button[aria-label="Save environment"]').click()`);
+  await wait(`document.body.textContent.includes('Changes detected. Press the reload arrow')`,'Port change did not require reload');
+  assert.equal(await (await fetch(`http://127.0.0.1:${port}/smoke`)).text(),'synthetic draft edit');
+  await run(`document.querySelector('button[aria-label="Reload mock server"]').click()`);
+  await wait(`!document.body.textContent.includes('Changes detected. Press the reload arrow')`,'Port reload failed');
+  assert.equal(await (await fetch(`http://127.0.0.1:${nextPort}/smoke`)).text(),'synthetic draft edit');
+  await assert.rejects(fetch(`http://127.0.0.1:${port}/smoke`));
+  await run(`Array.from(document.querySelectorAll('button')).find(e=>e.textContent.trim()==='Stop').click()`);
+  await wait(`!document.querySelector('button[aria-label="Reload mock server"]')`,'Stop failed');
+  await assert.rejects(fetch(`http://127.0.0.1:${nextPort}/smoke`));
+  assert.ok(fs.existsSync(path.join(profile,'mock-api','environments.json')));
+};

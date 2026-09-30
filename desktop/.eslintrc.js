@@ -15,7 +15,7 @@ const rulesDirPlugin = require('eslint-plugin-rulesdir');
 rulesDirPlugin.RULES_DIR = path.join(__dirname, 'eslint-rules');
 
 // enforces copy-right header and @format directive to be present in every file
-const pattern = /^\*\r?\n[\S\s]*Meta Platforms, Inc\.[\S\s]* \* @format\r?\n/;
+const pattern = /^\*\r?\n[\S\s]*(?:Meta Platforms, Inc\.|Flipper Community contributors)[\S\s]* \* @format\r?\n/;
 
 // This list should match the replacements defined in `replace-flipper-requires.ts` and `dispatcher/plugins.tsx`
 const builtInModules = [

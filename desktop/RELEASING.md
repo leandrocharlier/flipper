@@ -40,7 +40,7 @@ skips; skipped tests must never be reported as passing tests.
 - `publish_android=true` is the normal default: dispatch Android/Maven publishing
   after the GitHub release. Maven credentials/signing and the Android publishing
   workflow must be validated separately before enabling it for a real release.
-- For the first **0.3.0 desktop-only** release, set `publish_android=false`.
+- For desktop-only releases, including **0.3.0** and **1.0.0**, set `publish_android=false`.
 - For a build rehearsal with no publication, also set `publish_release=false`.
 
 Creating a desktop tag does not independently trigger the inherited npm or

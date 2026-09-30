@@ -27,6 +27,7 @@ exports[`can create a Fake flipper with legacy wrapper 1`] = `
   ],
   "enabledDevicePlugins": Set {
     "DeviceLogs",
+    "MockAPI",
     "CrashReporter",
     "MobileBuilds",
     "Hermesdebuggerrn",

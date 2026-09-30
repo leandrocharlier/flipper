@@ -376,5 +376,21 @@
     "file": "use-composed-ref-1.3.0-declared-license.txt",
     "source": "https://registry.npmjs.org/use-composed-ref/1.3.0",
     "licenseTextSource": "https://api.github.com/repos/spdx/license-list-data/git/blobs/d817195dad53ec992418c28ffca5fbd1cd86502a"
+  },
+  "@mockoon/commons@9.9.0": {
+    "source": "https://raw.githubusercontent.com/mockoon/mockoon/v9.9.0/LICENSE.md",
+    "file": "mockoon-9.9.0-LICENSE.txt"
+  },
+  "@mockoon/commons-server@9.9.0": {
+    "source": "https://raw.githubusercontent.com/mockoon/mockoon/v9.9.0/LICENSE.md",
+    "file": "mockoon-9.9.0-LICENSE.txt"
+  },
+  "cookie-signature@1.0.6": {
+    "file": "visionmedia-node-cookie-signature-a2671bf753dfdc9caafbbfd3fe4a1ef6dabf15a5.txt",
+    "source": "https://api.github.com/repos/visionmedia/node-cookie-signature/git/blobs/a2671bf753dfdc9caafbbfd3fe4a1ef6dabf15a5",
+    "blobSha": "a2671bf753dfdc9caafbbfd3fe4a1ef6dabf15a5",
+    "licenseId": "MIT",
+    "projectLicense": true,
+    "declaredLicense": "MIT"
   }
 }

@@ -1,7 +1,7 @@
 {
   "name": "flipper-desktop",
   "productName": "Flipper",
-  "version": "0.3.0",
+  "version": "1.0.0",
   "description": "Flipper desktop application for Android debugging",
   "author": "Flipper contributors",
   "license": "MIT",

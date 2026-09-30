@@ -165,7 +165,12 @@ export type Action =
     }
   | RegisterPluginAction;
 
-const DEFAULT_DEVICE_BLACKLIST: DeviceOS[] = ['MacOS', 'Metro', 'Windows'];
+const DEFAULT_DEVICE_BLACKLIST: DeviceOS[] = [
+  'MacOS',
+  'Metro',
+  'Windows',
+  'Linux',
+];
 const INITAL_STATE: State = {
   devices: [],
   selectedDevice: null,
@@ -178,6 +183,7 @@ const INITAL_STATE: State = {
   enabledPlugins: {},
   enabledDevicePlugins: new Set([
     'DeviceLogs',
+    'MockAPI',
     'CrashReporter',
     'MobileBuilds',
     'Hermesdebuggerrn',

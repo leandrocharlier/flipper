@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+  <!-- Debug sample only. Normal certificates and host-name validation stay enabled. -->
+  <domain-config cleartextTrafficPermitted="true">
+    <domain>localhost</domain>
+    <domain>127.0.0.1</domain>
+    <trust-anchors>
+      <certificates src="system" />
+      <certificates src="@raw/mock_api_dev_ca" />
+    </trust-anchors>
+  </domain-config>
+</network-security-config>
