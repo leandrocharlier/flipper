@@ -21,6 +21,48 @@ import {
   handleDeviceDisconnected,
 } from '../dispatcher/flipperServer';
 import {TestDevice} from '../devices/TestDevice';
+import {getActiveDevice} from '../selectors/connections';
+
+test('an app follows its dummy device when ADB registers the real device', async () => {
+  const plugin = new _SandyPluginDefinition(
+    TestUtils.createMockPluginDetails(),
+    {
+      plugin() {
+        return {};
+      },
+      Component() {
+        return null;
+      },
+    },
+  );
+  const dummy = new TestDevice(
+    'emulator-5554',
+    'dummy',
+    'Provisional',
+    'Android',
+  );
+  const {client, store, server, logger} = await createMockFlipperWithPlugin(
+    plugin,
+    {device: dummy},
+  );
+  expect(getActiveDevice(store.getState())).toBe(dummy);
+
+  const real = new TestDevice(
+    'emulator-5554',
+    'emulator',
+    'Android emulator',
+    'Android',
+  );
+  handleDeviceConnected(server, store, logger, real.description);
+
+  const registered = store
+    .getState()
+    .connections.devices.find((device) => device.serial === dummy.serial);
+  expect(registered?.deviceType).toBe('emulator');
+  expect(client.device).toBe(registered);
+  expect(getActiveDevice(store.getState())).toBe(registered);
+  expect(store.getState().connections.selectedAppId).toBe(client.id);
+});
 
 test('Devices can disconnect', async () => {
   const deviceplugin = new _SandyPluginDefinition(

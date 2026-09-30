@@ -35,6 +35,11 @@ import {openUI, UIPreference} from './utils/openUI';
 const argv = yargs
   .usage('yarn flipper-server [args]')
   .options({
+    'desktop-shell': {
+      describe: 'Run as an IPC-owned child of the desktop window.',
+      type: 'boolean',
+      default: false,
+    },
     port: {
       describe: 'TCP port to serve on',
       type: 'number',
@@ -72,6 +77,17 @@ const argv = yargs
   .version('DEV')
   .help()
   .parseSync(process.argv.slice(1));
+
+let desktopShutdown: () => void = () => process.exit(0);
+if (argv['desktop-shell']) {
+  if (!process.send) {
+    throw new Error('--desktop-shell requires a parent IPC channel');
+  }
+  process.once('disconnect', () => desktopShutdown());
+  process.on('message', (message: {type?: string}) => {
+    if (message?.type === 'desktop-shutdown') desktopShutdown();
+  });
+}
 
 console.log(
   `[flipper-server] Starting flipper server with ${
@@ -161,6 +177,14 @@ async function start() {
 
   console.info('[flipper-server] Check for running instances');
   const existingRunningInstanceVersion = await checkServerRunning(argv.port);
+  if (
+    argv['desktop-shell'] &&
+    (existingRunningInstanceVersion || (await checkPortInUse(argv.port)))
+  ) {
+    throw new Error(
+      'Another server is using the Flipper port. Close it before opening Flipper Desktop.',
+    );
+  }
   if (existingRunningInstanceVersion) {
     console.info(
       `[flipper-server] Running instance found with version: ${existingRunningInstanceVersion}, current version: ${environmentInfo.appVersion}`,
@@ -191,6 +215,7 @@ async function start() {
       staticPath,
       entry: `index.web.html`,
       port: argv.port,
+      host: argv['desktop-shell'] ? '127.0.0.1' : undefined,
     },
     environmentInfo,
   );
@@ -211,6 +236,15 @@ async function start() {
     'external',
     environmentInfo,
   );
+
+  if (argv['desktop-shell']) {
+    let closing = false;
+    desktopShutdown = () => {
+      if (closing) return;
+      closing = true;
+      flipperServer.close().finally(() => process.exit(0));
+    };
+  }
 
   flipperServer.once('browser-connection-created', () => {
     reportBrowserConnection(true);
@@ -268,7 +302,10 @@ async function start() {
   console.info(
     `[flipper-server][bootstrap] Development server attached (${developmentServerAttachedMS} ms)`,
   );
-  readyForIncomingConnections(flipperServer);
+  await readyForIncomingConnections(flipperServer);
+  if (argv['desktop-shell']) {
+    process.send?.({type: 'desktop-ready', port: argv.port});
+  }
 
   const t9 = performance.now();
   const serverStartedMS = t9 - t8;

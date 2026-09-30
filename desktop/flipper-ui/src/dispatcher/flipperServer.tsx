@@ -387,6 +387,14 @@ export function handleDeviceConnected(
   }
 
   const device = new BaseDevice(server, deviceInfo);
+  // An app may connect before ADB discovers its device. When the provisional
+  // device is replaced, keep the app attached to the registered device so its
+  // device plugins (including Logs) and selection use the real capabilities.
+  for (const client of store.getState().connections.clients.values()) {
+    if (client.device === existing) {
+      client.device = device;
+    }
+  }
   device.loadDevicePlugins(
     store.getState().plugins.devicePlugins,
     store.getState().connections.enabledDevicePlugins,

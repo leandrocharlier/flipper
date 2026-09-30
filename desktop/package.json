@@ -122,6 +122,7 @@
     "build-plugin": "tsx scripts/build-plugin.tsx",
     "build:eslint": "cd eslint-plugin-flipper && yarn build",
     "build:flipper-server": "yarn build:tsc && tsx scripts/build-flipper-server-release.tsx",
+    "build:desktop:win": "yarn build:flipper-server --win && npm --prefix electron ci && npm --prefix electron run dist:win",
     "build:themes": "lessc --js themes/light.less static/themes/light.css && lessc --js themes/dark.less static/themes/dark.css",
     "build:tsc": "tsc -b tsc-root/tsconfig.json && tsx ./scripts/compute-package-checksum.tsx -d ./babel-transformer -o ./lib/checksum.txt",
     "bump-versions": "tsx scripts/bump-versions.tsx",

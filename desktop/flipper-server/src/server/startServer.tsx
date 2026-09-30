@@ -32,6 +32,7 @@ import util from 'node:util';
 
 type Config = {
   port: number;
+  host?: string;
   staticPath: string;
   entry: string;
 };
@@ -235,7 +236,7 @@ async function startHTTPServer(
     }
   });
 
-  server.listen(config.port);
+  server.listen(config.port, config.host);
 
   /**
    * Create the promise which can be waited on. In this case,
