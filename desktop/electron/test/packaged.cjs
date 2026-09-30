@@ -58,6 +58,7 @@ async function wait(expression,label) {
   });
   await new Promise((resolve,reject)=>{socket.addEventListener('open',resolve,{once:true});socket.addEventListener('error',reject,{once:true});});
   await wait(`(() => {Array.from(document.querySelectorAll('button')).find(e=>e.textContent.includes('Skip Setup Wizard'))?.click();return !!Array.from(document.querySelectorAll('.ant-menu-submenu-title')).find(e=>e.textContent.trim()==='More');})()`, 'Main UI did not load');
+  await run(`Array.from(document.querySelectorAll('.ant-modal button')).find(e=>e.textContent.trim()==='Close')?.click()`);
   assert.equal(await run(`(() => {try{return typeof window.require('node:fs').readFileSync==='function'}catch{return false}})()`),false);
   result.rendererIsolation=true;
   const rows=Array.from({length:4100},(_,i)=>({date:new Date(1700000000000+i).toISOString(),pid:4242,tid:4243,tag:'ReleaseTest',type:i%2?'debug':'info',message:`Synthetic event ${i}\n`,count:1,pidStr:'4242',processName:'com.example.release'}));
@@ -66,7 +67,18 @@ async function wait(expression,label) {
   await run(`Array.from(document.querySelectorAll('.ant-menu-submenu-title')).find(e=>e.textContent.trim()==='More').dispatchEvent(new MouseEvent('mouseover',{bubbles:true}))`);
   await wait(`!!Array.from(document.querySelectorAll('[role="menuitem"]')).find(e=>e.textContent.trim()==='Import Flipper file')`,'Import menu missing');
   await run(`Array.from(document.querySelectorAll('[role="menuitem"]')).find(e=>e.textContent.trim()==='Import Flipper file').click()`);
-  await wait(`(() => {const item=Array.from(document.querySelectorAll('.ant-menu-item .ant-typography')).find(e=>e.textContent==='Logs');item?.closest('.ant-menu-item')?.click();return !!document.querySelector('[aria-label="Logcat text"]') && document.querySelector('[role="status"]')?.textContent.includes((4100).toLocaleString());})()`,'Synthetic logs did not import');
+  await wait(`(() => {
+    Array.from(document.querySelectorAll('.ant-modal button')).find(e=>e.textContent.trim()==='Close')?.click();
+    const selector=document.querySelector('button[title="Select the device / app to inspect"]');
+    if (!selector?.textContent.includes('Synthetic release fixture')) {
+      const device=Array.from(document.querySelectorAll('[role="menuitem"]')).find(e=>e.textContent.includes('Synthetic release fixture'));
+      if(device) device.click(); else selector?.click();
+      return false;
+    }
+    const item=Array.from(document.querySelectorAll('.ant-menu-item .ant-typography')).find(e=>e.textContent==='Logs');
+    item?.closest('.ant-menu-item')?.click();
+    return !!document.querySelector('[aria-label="Logcat text"]') && document.querySelector('[role="status"]')?.textContent.includes((4100).toLocaleString());
+  })()`,'Synthetic logs did not import');
   const viewer=`document.querySelector('[aria-label="Logcat text"]')`;
   assert.equal(await run(`getComputedStyle(${viewer}).whiteSpace`),'pre');
   assert.ok(await run(`Array.from(${viewer}.children).every(row=>!row.lastElementChild.textContent.endsWith(String.fromCharCode(10,10)))`));
