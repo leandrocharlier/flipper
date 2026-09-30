@@ -62,7 +62,9 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y make perl libtext-template-perl
-          sdkmanager 'platforms;android-34' 'build-tools;34.0.0' 'build-tools;36.0.0' 'ndk;25.1.8937393' 'ndk;27.2.12479018' 'cmake;3.22.1'
+          SDKMANAGER=$(find "$ANDROID_HOME/cmdline-tools" -type f -name sdkmanager | sort -V | tail -n 1)
+          test -n "$SDKMANAGER"
+          "$SDKMANAGER" 'platforms;android-34' 'build-tools;34.0.0' 'build-tools;36.0.0' 'ndk;25.1.8937393' 'ndk;27.2.12479018' 'cmake;3.22.1'
       - name: Rebuild OpenSSL for every ABI
         run: ANDROID_NDK_HOME="$ANDROID_HOME/ndk/27.2.12479018" JOBS=4 bash scripts/build-openssl-16k.sh
       - name: Rebuild all native plugin dependencies
