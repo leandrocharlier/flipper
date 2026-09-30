@@ -8,9 +8,10 @@ load segments.
 
 - JDK 17, with `JAVA_HOME` and its `bin` directory on `PATH`.
 - Android SDK, NDK `27.2.12479018`, CMake `3.22.1`, build-tools `36.0.0`.
-- Git Bash, curl, tar, make and a complete Perl installation (`Pod::Usage`).
-  Git's minimal Perl may not include this module. `PERL5LIB` can point to a
-  compatible full Perl module directory.
+- Git Bash, curl, tar, make and a complete Perl installation (`Pod::Usage`,
+  `Locale::Maketext::Simple`, `ExtUtils::MakeMaker`). Git's minimal Perl may lack
+  these modules. `PERL5LIB` can point to compatible complete Perl modules; with
+  Git Bash, use a POSIX path such as `/c/tools/perl-lib`, not `C:\tools\perl-lib`.
 - Network access for the pinned source archives and Maven dependencies.
 
 From the repository root, build OpenSSL in Git Bash (use your SDK path):
@@ -38,6 +39,10 @@ these rebuilt artifacts in your own Maven repository first.
 ## Changes and scope
 
 - fbjni 0.7.0 and Android API 21 minimum.
+- OpenSSL 3.5.8 LTS, Java-WebSocket 1.6.0 and OkHttp 4.12.0.
+- Certificate requests use the correct PKCS#10 version encoding (zero), which
+  OpenSSL 3 validates. Fresh desktop certificate exchange must be tested as well
+  as startup; an app can start successfully and still fail while generating a CSR.
 - Flipper, libevent, OpenSSL, Yoga, Flexlayout, Fresco native libraries and
   inspection tooling use 16 KB ELF load alignment.
 - The JNI APIs and Java classes from the existing sample dependencies are kept.
@@ -45,10 +50,14 @@ these rebuilt artifacts in your own Maven repository first.
   component called a Litho method absent from this version.
 - The sample POST and image URLs point to working public test resources.
 
-OpenSSL 1.1.1w preserves the existing 1.1 ABI but is end-of-life. This build fixes
-page-size compatibility; it is not a migration to a maintained OpenSSL major
-version. OpenSSL assembly and libjpeg SIMD are disabled in these compatibility
-builds. A later security/performance modernization needs separate testing.
+OpenSSL is built from the pinned, SHA-256-verified 3.5.8 source archive. It is
+linked using OpenSSL's shared-target object lists into `libcrypto.so` and
+`libssl.so` with 16 KB alignment;
+Flipper's native code must be rebuilt against its headers. Do not substitute
+these libraries into an APK compiled against OpenSSL 1.1. OpenSSL providers are
+built in (`no-module`); no external provider modules need to be shipped. OpenSSL
+assembly and libjpeg SIMD remain disabled in these builds. Some Flipper RSA calls
+use OpenSSL's deprecated, still-supported APIs and produce compiler warnings.
 
 ## Validation
 

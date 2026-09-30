@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-# Build the existing OpenSSL 1.1 ABI for Flipper with 16 KB ELF alignment.
+# Build OpenSSL 3.5 LTS for Flipper with 16 KB ELF alignment.
 # Prerequisites: NDK r27+, bash, curl, tar, full Perl (Pod::Usage), make, JDK jar.
-# OpenSSL 1.1.1 is EOL: this compatibility build is not a security upgrade to 3.x.
 set -euo pipefail
 : "${ANDROID_NDK_HOME:?Set ANDROID_NDK_HOME to NDK r27 or newer}"
+export ANDROID_NDK_ROOT="$ANDROID_NDK_HOME"
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
-WORK="$ROOT/work/openssl-16k"
-VERSION=1.1.1w
-REVISION=1.1.1w-16k
+VERSION=3.5.8
+REVISION=$VERSION-16k
+WORK="$ROOT/work/openssl-$VERSION-16k"
 case "$(uname -s)" in
   MINGW*|MSYS*) HOST=windows-x86_64 ;;
   Linux*) HOST=linux-x86_64 ;;
@@ -21,14 +21,14 @@ perl -MPod::Usage -e 1
 mkdir -p "$WORK"
 ARCHIVE="$WORK/openssl-$VERSION.tar.gz"
 if [ ! -f "$ARCHIVE" ]; then
-  curl -fL --retry 3 "https://github.com/openssl/openssl/releases/download/OpenSSL_1_1_1w/openssl-$VERSION.tar.gz" -o "$ARCHIVE"
+  curl -fL --retry 3 "https://github.com/openssl/openssl/releases/download/openssl-$VERSION/openssl-$VERSION.tar.gz" -o "$ARCHIVE"
 fi
-echo "cf3098950cb4d853ad95c0841f1f9c6d3dc102dccfcacd521d93925208b76ac8  $ARCHIVE" | sha256sum -c -
+echo "a8f84a39918ec6415ce765d9b429d313ba97b8143169c172e734b9514464f5b2  $ARCHIVE" | sha256sum -c -
 STAGE="$WORK/aar"
 mkdir -p "$STAGE/prefab/modules/crypto/include/openssl" "$STAGE/prefab/modules/ssl/include/openssl"
 chmod -R u+w "$STAGE"
 printf '<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="local.flipper.openssl" />\n' > "$STAGE/AndroidManifest.xml"
-printf '{"name":"openssl","schema_version":1,"dependencies":[],"version":"1.1.1.23"}\n' > "$STAGE/prefab/prefab.json"
+printf '{"name":"openssl","schema_version":1,"dependencies":[],"version":"%s"}\n' "$VERSION" > "$STAGE/prefab/prefab.json"
 for ABI in x86_64 arm64-v8a x86 armeabi-v7a; do
   case "$ABI" in
     x86_64) TARGET=android-x86_64; TRIPLE=x86_64-linux-android21 ;;
@@ -43,18 +43,28 @@ for ABI in x86_64 arm64-v8a x86 armeabi-v7a; do
   fi
   (
     cd "$BUILD"
-    perl Configure "$TARGET" -D__ANDROID_API__=21 no-tests no-asm shared
+    perl Configure "$TARGET" -D__ANDROID_API__=21 no-tests no-asm no-module shared
     make build_generated
-    make -j"${JOBS:-8}" libcrypto.a libssl.a libcrypto.map libssl.map
-    # Link archives to avoid Windows' command-line limit with hundreds of objects.
-    clang --target="$TRIPLE" -shared -Wl,-soname,libcrypto.so \
-      -Wl,-z,max-page-size=16384 -Wl,-z,common-page-size=16384 \
-      -Wl,--version-script,libcrypto.map -Wl,--whole-archive libcrypto.a \
-      -Wl,--no-whole-archive -ldl -pthread -o libcrypto.so
-    clang --target="$TRIPLE" -shared -Wl,-soname,libssl.so \
-      -Wl,-z,max-page-size=16384 -Wl,-z,common-page-size=16384 \
-      -Wl,--version-script,libssl.map -Wl,--whole-archive libssl.a \
-      -Wl,--no-whole-archive -L. -lcrypto -ldl -pthread -o libssl.so
+    make libcrypto.ld libssl.ld
+    # OpenSSL 3's shared targets have different objects from the static archives
+    # (including internal helpers used by libssl). Use the generated Makefile's
+    # shared object lists, and response files to stay below Windows argv limits.
+    for LIB in crypto ssl; do
+      LIB="$LIB" perl -0777 -ne '
+        my $name = $ENV{LIB};
+        /^lib\Q$name\E\.so: ((?:[^\n]*\\\n)*[^\n]*)/m or die "Missing shared target lib$name";
+        my @objects = $1 =~ /([A-Za-z0-9_.\/-]+\.(?:o|a))\b/g;
+        @objects or die "Empty shared target lib$name";
+        print "$_\n" for @objects;
+      ' Makefile > "lib$LIB-objects.rsp"
+      xargs -n 64 make -j"${JOBS:-8}" < "lib$LIB-objects.rsp"
+      EXTRA=()
+      if [ "$LIB" = ssl ]; then EXTRA=(-L. -lcrypto); fi
+      clang --target="$TRIPLE" -shared -Wl,-soname,lib$LIB.so \
+        -Wl,-z,defs -Wl,-z,max-page-size=16384 -Wl,-z,common-page-size=16384 \
+        -Wl,--version-script,lib$LIB.ld "@lib$LIB-objects.rsp" \
+        "${EXTRA[@]}" -ldl -pthread -o "lib$LIB.so"
+    done
   )
   for LIB in crypto ssl; do
     MODULE="$STAGE/prefab/modules/$LIB"
@@ -62,28 +72,28 @@ for ABI in x86_64 arm64-v8a x86 armeabi-v7a; do
     cp -f "$BUILD/lib$LIB.so" "$MODULE/libs/android.$ABI/"
     cp -f "$BUILD/lib$LIB.so" "$STAGE/jni/$ABI/"
     cp -f "$BUILD/include/openssl/"*.h "$MODULE/include/openssl/"
-    cp -f "$BUILD/include/openssl/opensslconf.h" "$MODULE/include/openssl/opensslconf-$ABI.h"
+    cp -f "$BUILD/include/openssl/configuration.h" "$MODULE/include/openssl/configuration-$ABI.h"
     chmod -R u+w "$MODULE/include"
     printf '{}\n' > "$MODULE/module.json"
     printf '{"abi":"%s","api":21,"ndk":27,"stl":"none"}\n' "$ABI" > "$MODULE/libs/android.$ABI/abi.json"
   done
 done
 for LIB in crypto ssl; do
-  cat > "$STAGE/prefab/modules/$LIB/include/openssl/opensslconf.h" <<'HEADER'
+  cat > "$STAGE/prefab/modules/$LIB/include/openssl/configuration.h" <<'HEADER'
 #if defined(__aarch64__)
-#include "opensslconf-arm64-v8a.h"
+#include "configuration-arm64-v8a.h"
 #elif defined(__arm__)
-#include "opensslconf-armeabi-v7a.h"
+#include "configuration-armeabi-v7a.h"
 #elif defined(__x86_64__)
-#include "opensslconf-x86_64.h"
+#include "configuration-x86_64.h"
 #elif defined(__i386__)
-#include "opensslconf-x86.h"
+#include "configuration-x86.h"
 #else
 #error Unsupported Android ABI
 #endif
 HEADER
 done
-cp "$WORK/x86_64/openssl-$VERSION/LICENSE" "$STAGE/LICENSE-OpenSSL"
+cp "$WORK/x86_64/openssl-$VERSION/LICENSE.txt" "$STAGE/LICENSE-OpenSSL"
 REPO="$ROOT/android/third-party/generated-16k/maven/local/flipper/openssl/$REVISION"
 mkdir -p "$REPO"
 jar cf "$REPO/openssl-$REVISION.aar" -C "$STAGE" .

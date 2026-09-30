@@ -10,7 +10,7 @@
 const dotenv = require('dotenv').config();
 import path from 'path';
 import os from 'os';
-import tar from 'tar';
+import * as tar from 'tar';
 import {
   buildBrowserBundle,
   buildFolder,

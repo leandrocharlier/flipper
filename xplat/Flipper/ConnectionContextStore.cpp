@@ -75,7 +75,7 @@ std::string ConnectionContextStore::getCertificateSigningRequest() {
       absoluteFilePath(CSR_FILE_NAME).c_str(),
       absoluteFilePath(PRIVATE_KEY_FILE).c_str());
   if (!success) {
-    throw new std::runtime_error("Failed to generate CSR");
+    throw std::runtime_error("Failed to generate CSR");
   }
   csr_ = loadStringFromFile(absoluteFilePath(CSR_FILE_NAME));
 

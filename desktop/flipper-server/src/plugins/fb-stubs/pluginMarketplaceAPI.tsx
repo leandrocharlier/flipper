@@ -27,7 +27,7 @@ export async function loadAvailablePlugins(
 }
 
 // Adapter which forces node.js implementation for axios instead of browser implementation
-const axiosHttpAdapter = require('axios/lib/adapters/http'); // eslint-disable-line import/no-commonjs
+const axiosHttpAdapter = 'http' as const;
 
 export async function httpGet(
   url: URL,

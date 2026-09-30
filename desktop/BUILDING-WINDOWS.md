@@ -8,6 +8,10 @@ browser/server launcher remains available separately.
 
 Use Node.js 24 LTS, Yarn 1.22.22, Git for Windows and an Android SDK. From `desktop`:
 
+When updating an existing checkout, start from clean generated `node_modules`
+directories (or a fresh checkout). Yarn Classic can retain obsolete nested Babel
+copies after resolutions change; keep the committed lockfiles.
+
 ```powershell
 npx.cmd --yes yarn@1.22.22 install --frozen-lockfile
 npx.cmd --yes yarn@1.22.22 test --runInBand --watch=false plugins/public/network/__tests__ plugins/public/logs/__tests__ pkg-lib/src/__tests__/watchman.node.tsx
@@ -37,12 +41,12 @@ Or, after building the server, run `npm.cmd ci` and `npm.cmd run dist:win` from
 not replace the existing Yarn dependencies. The build produces these artifacts
 under `dist/electron`:
 
-- `Flipper-0.273.1-Windows-x64.exe`: per-user NSIS installer.
-- `Flipper-0.273.1-Windows-x64.zip`: portable folder containing `Flipper.exe`.
+- `Flipper-0.273.2-Windows-x64.exe`: per-user NSIS installer.
+- `Flipper-0.273.2-Windows-x64.zip`: portable folder containing `Flipper.exe`.
 
 Extract the entire ZIP before opening `Flipper.exe`. Node is bundled; Android SDK
 and OpenSSL still need to be installed as described above. The shell version is
-0.273.1; the embedded Flipper backend and plugin versions remain 0.273.0.
+0.273.2; the embedded Flipper backend and plugin versions remain 0.273.0.
 The binaries are unsigned. Code signing requires a certificate owned by the fork
 maintainer. No automatic update feed is configured.
 
@@ -86,6 +90,21 @@ use a separate Electron profile.
 
 ## Validation scope
 
+The dependency maintenance update includes Axios 1.20.0 (using its public HTTP
+adapter), ws 8.22.0, Express 4.22.3, node-forge 1.4.0, form-data 4.0.6, tmp 0.2.7,
+tar 7.5.22 and yauzl 3.4.0. Plugin extraction no longer uses `decompress`: tests
+cover npm tarballs, VSIX ZIPs, invalid archives, traversal paths and links.
+Run these additional suites from `desktop`:
+
+```powershell
+npx.cmd --yes yarn@1.22.22 test --runInBand plugin-lib/src/__tests__ flipper-server/src/commands/__tests__/DownloadFile flipper-server/src/plugins/__tests__/PluginManager.node.tsx
+```
+
+Together with the Network, Logs, Watchman and connection suites below, the
+maintenance selection passes 81 tests and 21 snapshots (one Unix-only case skips
+on Windows), plus seven Electron process/backend tests. A real HTTP download
+test covers Axios streaming, beyond the existing mocked download tests.
+
 The existing Network and Logs suites cover 29 tests. A new Watchman regression
 test verifies that a missing executable cannot crash the server a minute later.
 The connection and disconnection suites include a regression for an app connecting
@@ -102,3 +121,19 @@ CI runner can build and run automated tests, but Windows cannot execute the Mac
 application. This work also
 does not constitute a complete security upgrade of all the archived project's
 dependencies.
+
+## Artifact sizes for the dependency update
+
+The 0.273.2 maintenance build was compared with the previously tested 0.273.1
+desktop and full Android sample. Sizes are MiB (1,048,576 bytes):
+
+| Artifact | Before | After | Change |
+| --- | ---: | ---: | ---: |
+| Full Android debug APK, four ABIs | 32.31 | 34.10 | +5.53% |
+| Windows x64 installer | 161.29 | 162.36 | +0.67% |
+| Windows x64 portable ZIP | 218.36 | 219.57 | +0.55% |
+
+The final APK was packaged after `:sample:clean` to avoid unused space from
+incremental APK updates. OpenSSL 3's native libraries account for the main content
+increase. The ZIP's extracted application was tested in a path containing spaces,
+including Android connectivity, single-instance behavior and normal shutdown.

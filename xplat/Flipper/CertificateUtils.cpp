@@ -92,7 +92,8 @@ bool generateCertSigningRequest(
   int ret = 0;
   BIGNUM* bne = NULL;
 
-  int nVersion = 1;
+  // PKCS#10 version 1 is encoded as zero. OpenSSL 3 rejects other values.
+  int nVersion = 0;
   int bits = 2048;
 
   // Using 65537 as exponent

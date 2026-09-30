@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "lib",
     "rootDir": "src",
-    "types": ["../types/npm-api", "../types/decompress-unzip", "../types/decompress-targz"]
+    "types": ["../types/npm-api"]
   },
   "references": [
     {

@@ -166,9 +166,9 @@ export class PluginManager {
           }
 
           if (
-            !parseHeaderValue(response.headers['content-type']).includes(
-              'application/octet-stream',
-            )
+            !parseHeaderValue(
+              String(response.headers['content-type']),
+            ).includes('application/octet-stream')
           ) {
             throw new Error(
               `It looks like you are not on VPN/Lighthouse. Unexpected content type received: ${response.headers['content-type']}.`,

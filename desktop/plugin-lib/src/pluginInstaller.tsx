@@ -14,9 +14,7 @@ import path from 'path';
 import fs from 'fs-extra';
 import {promisify} from 'util';
 import {PluginManager as PM} from 'live-plugin-manager';
-import decompress from 'decompress';
-import decompressTargz from 'decompress-targz';
-import decompressUnzip from 'decompress-unzip';
+import {extractPluginArchive} from './extractPluginArchive';
 import tmp from 'tmp';
 import {InstalledPluginDetails} from 'flipper-common';
 import {getInstalledPluginDetails, isPluginDir} from './getPluginDetails';
@@ -113,12 +111,7 @@ export async function installPluginFromFileOrBuffer(
 ): Promise<InstalledPluginDetails> {
   const tmpDir = await promisify(tmp.dir)();
   try {
-    const files = await decompress(packagePath, tmpDir, {
-      plugins: [decompressTargz(), decompressUnzip()],
-    });
-    if (!files.length) {
-      throw new Error('The package is not in tar.gz format or is empty');
-    }
+    await extractPluginArchive(packagePath, tmpDir);
     const pluginDir = await getPluginRootDir(tmpDir);
     return await installPluginFromTempDir(pluginDir);
   } finally {

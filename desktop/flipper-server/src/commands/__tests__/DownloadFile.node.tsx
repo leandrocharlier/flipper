@@ -80,7 +80,7 @@ describe('commands', () => {
         url: fakeDownloadURL,
       });
 
-      expect(downloadFileDescriptor.headers).toBe(fakeHeaders);
+      expect(downloadFileDescriptor.headers).toEqual(fakeHeaders);
       expect(downloadFileDescriptor.status).toBe(fakeStatus);
       expect(downloadFileDescriptor.statusText).toBe(fakeStatusText);
       expect(downloadFileDescriptor.id).toBe(fakeUuid);

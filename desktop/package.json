@@ -114,8 +114,24 @@
   "productName": "Flipper",
   "resolutions": {
     "adbkit-logcat": "^2.0.1",
-    "minimist": "1.2.6",
-    "node-forge": "^1.0.6"
+    "minimist": "1.2.8",
+    "node-forge": "^1.4.0",
+    "@babel/traverse": "^7.29.8",
+    "form-data": "^4.0.6",
+    "tar": "^7.5.22",
+    "ws": "^8.22.0",
+    "**/paged-request/axios": "^1.20.0",
+    "lodash": "^4.18.0",
+    "lodash-es": "^4.18.0",
+    "@babel/core": "^7.29.7",
+    "@babel/runtime": "^7.29.7",
+    "@babel/helpers": "^7.29.7",
+    "@babel/plugin-transform-modules-systemjs": "^7.29.4",
+    "moment": "^2.30.1",
+    "follow-redirects": "^1.16.0",
+    "fast-loops": "^1.1.4",
+    "flatted": "^3.4.2",
+    "browserslist": "^4.28.7"
   },
   "scripts": {
     "build": "yarn build:flipper-server",

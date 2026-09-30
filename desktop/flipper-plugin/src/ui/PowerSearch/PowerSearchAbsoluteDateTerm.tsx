@@ -10,9 +10,9 @@
 import {Button, DatePicker, DatePickerProps} from 'antd';
 import dayjs from 'dayjs';
 import React from 'react';
-// Use this exact version of moment to match what antd has
+// The workspace resolution keeps this dependency and antd on the same version.
 // eslint-disable-next-line no-restricted-imports
-import moment from 'antd/node_modules/moment';
+import moment from 'moment';
 
 type PowerSearchAbsoluteTermProps = {
   onCancel: () => void;
