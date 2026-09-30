@@ -28,6 +28,19 @@ the packaged UI test in CI. Test the actual package with
 
 ## GitHub Actions
 
+The maintenance fork keeps four workflows:
+
+- **Desktop CI**: TypeScript, the complete desktop Jest suite and process lifecycle
+  checks on desktop changes/PRs, using Node.js 24. It does not publish artifacts.
+- **Validate Gradle Wrapper**: verifies the wrapper on pushes/PRs.
+- **Desktop release**: manual native builds/tests and GitHub publication.
+- **Publish Android**: manual Maven publishing, retained for separate setup and validation.
+
+Inherited Meta deployment/docs workflows, legacy package publishing and independent
+JS/iOS/React Native example workflows have been removed. Those projects remain in
+the source tree; their standalone checks are no longer automatic. Native desktop
+builds and full packaged application checks remain mandatory in the release workflow.
+
 Run **Desktop release** with the matching desktop version and release notes at
 `desktop/releases/<version>.md`. Native runners build Windows x64, Linux x64,
 macOS x64 and macOS arm64, run tests and upload the installers. The publish job
