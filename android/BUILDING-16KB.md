@@ -32,9 +32,9 @@ Then run in PowerShell:
 Generated AARs and their local Maven repository live in
 `android/third-party/generated-16k/`, which survives `gradlew clean`. Sources and
 intermediate builds live in `work/`. Both directories are ignored by Git. Run the
-two native build scripts on a fresh checkout before building the app. Do not
-publish the SDK with unresolved `local.flipper` or `-16k` dependencies: distribute
-these rebuilt artifacts in your own Maven repository first.
+two native build scripts on a fresh checkout before building the app. Publication
+rewrites the rebuilt dependencies into the community namespace and validates all
+15 artifacts together. See [Maven integration and release checks](MAVEN.md).
 
 ## Changes and scope
 

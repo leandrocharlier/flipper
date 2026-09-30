@@ -74,3 +74,16 @@ website/src/embedded-pages/docs/plugins/
 
 # Local publishing keys, agent files, and signing checks. Never commit these.
 /.publishing/
+
+# Local Android app signing material. Passwords belong in local.properties.
+/.signing/
+*.keystore
+*.jks
+*.p12
+*.pfx
+*.flipper
+__pycache__/
+
+# Root Gradle reports and native publication outputs.
+/build/
+/android/native-artifacts/*/build/

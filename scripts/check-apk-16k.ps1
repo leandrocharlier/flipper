@@ -1,12 +1,14 @@
 param(
     [Parameter(Mandatory = $true)][string]$Apk,
-    [string]$Sdk = "$env:LOCALAPPDATA/Android/Sdk",
+    [string]$Sdk = $(if ($env:ANDROID_HOME) { $env:ANDROID_HOME } else { "$env:LOCALAPPDATA/Android/Sdk" }),
     [string]$Report = ''
 )
 $ErrorActionPreference = 'Stop'
 $apkPath = (Resolve-Path $Apk).Path
-$readelf = Join-Path $Sdk 'ndk/27.2.12479018/toolchains/llvm/prebuilt/windows-x86_64/bin/llvm-readelf.exe'
-$zipalign = Join-Path $Sdk 'build-tools/36.0.0/zipalign.exe'
+$binarySuffix = if ($env:OS -eq 'Windows_NT') { '.exe' } else { '' }
+$nativeHost = if ($env:OS -eq 'Windows_NT') { 'windows-x86_64' } elseif ($IsMacOS) { 'darwin-x86_64' } else { 'linux-x86_64' }
+$readelf = Join-Path $Sdk "ndk/27.2.12479018/toolchains/llvm/prebuilt/$nativeHost/bin/llvm-readelf$binarySuffix"
+$zipalign = Join-Path $Sdk "build-tools/36.0.0/zipalign$binarySuffix"
 $scratch = Join-Path (Split-Path $PSScriptRoot) 'work/apk-check'
 New-Item -ItemType Directory -Force $scratch | Out-Null
 Add-Type -AssemblyName System.IO.Compression.FileSystem

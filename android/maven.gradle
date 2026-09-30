@@ -1,0 +1,54 @@
+// Every Android SDK plugin participates in validation and publication.
+// Credentials are read locally or from Gradle environment properties, never stored here.
+subprojects { module ->
+    plugins.withId('com.vanniktech.maven.publish.base') {
+        mavenPublishing.publishToMavenCentral(false)
+        publishing.repositories.maven {
+            name = 'Validation'
+            url = rootProject.layout.projectDirectory.dir('work/maven-repository')
+        }
+        afterEvaluate {
+            // The full plugin handles this property itself; manual native
+            // publications use only the base plugin and need explicit signing.
+            if (rootProject.findProperty('signAllPublications') == 'true' &&
+                !plugins.hasPlugin('com.vanniktech.maven.publish')) {
+                mavenPublishing.signAllPublications()
+            }
+        }
+        tasks.withType(Jar).configureEach {
+            from(rootProject.file('LICENSE')) { into "META-INF/flipper/${module.name}" }
+            from(rootProject.file('NOTICE')) { into "META-INF/flipper/${module.name}" }
+        }
+    }
+    plugins.withId('signing') {
+        if (rootProject.findProperty('useGpgAgent') == 'true') signing.useGpgCmd()
+    }
+    plugins.withId('com.android.library') {
+        def notices = tasks.register('preparePublicationNotices', Sync) {
+            from([rootProject.file('LICENSE'), rootProject.file('NOTICE')]) {
+                into "META-INF/flipper/${module.name}"
+            }
+            into layout.buildDirectory.dir('publication-resources')
+            if (module.path == ':android') {
+                from(rootProject.file('android/native-artifacts/licenses')) {
+                    into 'META-INF/flipper/android/native-dependencies'
+                }
+            }
+        }
+        android.sourceSets.main.resources.srcDir(layout.buildDirectory.dir('publication-resources'))
+        tasks.named('preBuild').configure { dependsOn notices }
+    }
+}
+
+// Deliberately includes optional plugins; releases must not depend on which ones
+// the maintainer happens to use. The native dependencies are included as well.
+tasks.register('stageAndroidPublication') {
+    group = 'publishing'
+    description = 'Build every Android publication into an isolated local repository without uploading.'
+}
+gradle.projectsEvaluated {
+    tasks.named('stageAndroidPublication').configure {
+        dependsOn subprojects.findAll { it.plugins.hasPlugin('com.vanniktech.maven.publish.base') }
+            .collect { it.tasks.named('publishAllPublicationsToValidationRepository') }
+    }
+}

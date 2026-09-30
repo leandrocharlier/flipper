@@ -48,3 +48,10 @@ project(':jetpack-compose-plugin').projectDir = file('android/plugins/jetpack-co
 
 include ':inspection-lib'
 project(':inspection-lib').projectDir = file('android/plugins/inspection-lib')
+
+// Rebuilt dependencies are published with the SDK, under the community namespace.
+['openssl', 'yoga', 'flexlayout', 'imagepipeline-native', 'nativeimagefilters', 'nativeimagetranscoder'].each { nativeName ->
+    include ":native-${nativeName}"
+    project(":native-${nativeName}").projectDir = file("android/native-artifacts/${nativeName}")
+    project(":native-${nativeName}").buildFileName = '../artifact.gradle'
+}

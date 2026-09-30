@@ -8,6 +8,13 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 
+// These exclusions are published in Maven metadata. Consumers must not need
+// the development build's dependency-substitution rules to obtain 16 KB code.
+configurations.configureEach {
+    exclude group: 'com.facebook.yoga', module: 'yoga'
+    exclude group: 'com.facebook.litho', module: 'litho-flexlayout'
+}
+
 android {
     namespace 'com.facebook.flipper.plugins.litho'
     compileSdkVersion rootProject.compileSdkVersion
@@ -27,6 +34,8 @@ android {
         implementation project(':android')
         implementation deps.kotlinCoroutinesAndroid
         implementation deps.lithoCore
+        implementation project(':native-yoga')
+        implementation project(':native-flexlayout')
         api deps.lithoEditorCore
         api(deps.lithoEditorFlipper) {
             exclude group:'com.facebook.flipper', module:'flipper'
@@ -36,7 +45,7 @@ android {
         implementation deps.lithoSectionsCore
         implementation deps.lithoWidget
         implementation deps.supportAppCompat
-        implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.1"
+        implementation deps.kotlinxSerializationJson
         compileOnly deps.jsr305
 
         testImplementation deps.junit

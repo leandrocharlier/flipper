@@ -59,6 +59,9 @@ android {
     packagingOptions {
         exclude("**/libfbjni.so")
         exclude("**/libc++_shared.so")
+        // These are supplied once by the published flipper-openssl dependency.
+        exclude("**/libcrypto.so")
+        exclude("**/libssl.so")
     }
 
     externalNativeBuild {

@@ -1,13 +1,14 @@
 param(
-    [string]$Sdk = "$env:LOCALAPPDATA/Android/Sdk",
+    [string]$Sdk = $(if ($env:ANDROID_HOME) { $env:ANDROID_HOME } else { "$env:LOCALAPPDATA/Android/Sdk" }),
     [string]$NdkVersion = '27.2.12479018'
 )
 $ErrorActionPreference = 'Stop'
 $root = Split-Path $PSScriptRoot
 $work = Join-Path $root 'work'
 $ndk = Join-Path $Sdk "ndk/$NdkVersion"
-$cmake = Join-Path $Sdk 'cmake/3.22.1/bin/cmake.exe'
-$ninja = Join-Path $Sdk 'cmake/3.22.1/bin/ninja.exe'
+$binarySuffix = if ($env:OS -eq 'Windows_NT') { '.exe' } else { '' }
+$cmake = Join-Path $Sdk "cmake/3.22.1/bin/cmake$binarySuffix"
+$ninja = Join-Path $Sdk "cmake/3.22.1/bin/ninja$binarySuffix"
 if (!(Test-Path "$env:JAVA_HOME/include/jvmti.h")) { throw 'Set JAVA_HOME to a JDK (17 recommended).' }
 New-Item -ItemType Directory -Force $work | Out-Null
 

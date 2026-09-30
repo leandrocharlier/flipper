@@ -8,4 +8,11 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.facebook.flipper.plugins.leakcanary">
+    <application>
+        <!-- LeakCanary 1's launcher activity predates the Android 12 manifest
+             requirement. Preserve its launcher behavior explicitly. -->
+        <activity
+            android:name="com.squareup.leakcanary.internal.DisplayLeakActivity"
+            android:exported="true" />
+    </application>
 </manifest>

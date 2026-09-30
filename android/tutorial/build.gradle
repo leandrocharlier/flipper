@@ -48,7 +48,11 @@ android {
     }
 }
 
+ext.localSigningName = 'tutorial'
+apply from: rootProject.file('android/local-app-signing.gradle')
+
 dependencies {
+    testImplementation deps.junit
     implementation deps.kotlinStdLibrary
     implementation deps.supportAppCompat
     implementation deps.supportCoreKtx

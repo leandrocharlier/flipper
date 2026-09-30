@@ -5,8 +5,8 @@
   Flipper
 </h1>
 <p align="center">
-  <a href="https://search.maven.org/artifact/com.facebook.flipper/flipper">
-    <img src="https://img.shields.io/maven-central/v/com.facebook.flipper/flipper" alt="Android Maven Badge" />
+  <a href="https://central.sonatype.com/artifact/io.github.leandrocharlier.flipper/flipper">
+    <img src="https://img.shields.io/maven-central/v/io.github.leandrocharlier.flipper/flipper" alt="Community Android Maven Badge" />
   </a>
   <a href="https://cocoapods.org/pods/Flipper">
     <img src="https://img.shields.io/cocoapods/v/FlipperKit.svg?label=iOS&color=blue" alt="iOS" />
@@ -23,8 +23,11 @@ Community version **1.0.0** includes Mock API and native desktop builds for Wind
 macOS (Intel and Apple Silicon), and Linux. See [desktop release instructions](desktop/RELEASING.md).
 This fork is independent and is not an official Meta release. The original
 MIT license and copyright notices are retained; see [NOTICE](NOTICE).
-The Maven and CocoaPods badges above refer to upstream packages, not releases of
-this fork.
+The Android Maven badge refers to this fork; the CocoaPods badge still refers to
+the upstream iOS package. Android SDK version **1.0.0** uses the Maven group
+`io.github.leandrocharlier.flipper`. See [integration, all plugin coordinates and
+release checks](android/MAVEN.md). Every Android release includes all plugins and
+their rebuilt native dependencies.
 
 - Windows desktop restored with Electron 44: an `.exe` installer and a portable
   ZIP containing `Flipper.exe`, with Node.js 24 bundled. The browser launcher is

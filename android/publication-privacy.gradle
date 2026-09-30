@@ -1,0 +1,58 @@
+import java.util.zip.ZipInputStream
+import java.nio.charset.StandardCharsets
+import org.gradle.api.publish.maven.tasks.AbstractPublishToMaven
+
+// Fail before any Maven repository receives an artifact containing local secrets.
+def localSecrets = new Properties()
+def localConfig = rootProject.file('local.properties')
+if (localConfig.isFile()) {
+    localConfig.withInputStream { localSecrets.load(it) }
+}
+def protectedValues = localSecrets.stringPropertyNames().findAll {
+    it.toLowerCase(Locale.ROOT).contains('password') || it == 'mavenCentralUsername'
+}.collect { localSecrets.getProperty(it) }.findAll { it && it.length() >= 8 }
+['mavenCentralUsername', 'mavenCentralPassword', 'signingInMemoryKeyPassword'].each { key ->
+    def value = providers.gradleProperty(key).orNull
+    if (value && value.length() >= 8) protectedValues.add(value)
+}
+
+def inspectFile
+inspectFile = { String name, byte[] bytes, int depth ->
+    def normalized = name.replace('\\', '/').toLowerCase(Locale.ROOT)
+    def forbiddenParts = ['local.properties', '.signing', '.publishing', 'private-keys-v1.d', '.git']
+    if (normalized.split('/').any { forbiddenParts.contains(it) } ||
+        normalized ==~ /.*\.(keystore|jks|p12|pfx|pem|key|gpg|kbx|flipper)$/) {
+        throw new GradleException('Publication blocked: a local/private file is included.')
+    }
+    def content = new String(bytes, StandardCharsets.ISO_8859_1)
+    if ((content =~ /-----BEGIN (?:[A-Z ]*PRIVATE KEY(?: BLOCK)?)-----[\r\n]+[A-Za-z0-9+\/=]{30,}/).find() ||
+        protectedValues.any { content.contains(it) }) {
+        throw new GradleException('Publication blocked: private key or local credential content detected.')
+    }
+    if (normalized.endsWith('.aar') || normalized.endsWith('.jar') || normalized.endsWith('.zip')) {
+        if (depth >= 8) throw new GradleException('Publication blocked: archive nesting limit exceeded.')
+        new ZipInputStream(new ByteArrayInputStream(bytes)).withCloseable { zip ->
+            def entry
+            while ((entry = zip.nextEntry) != null) {
+                if (!entry.directory) inspectFile(entry.name, zip.readAllBytes(), depth + 1)
+                zip.closeEntry()
+            }
+        }
+    }
+}
+
+subprojects {
+    tasks.withType(AbstractPublishToMaven).configureEach {
+        doFirst {
+            publication.artifacts.each { artifact ->
+                inspectFile(artifact.file.name, artifact.file.bytes, 0)
+            }
+            def metadata = layout.buildDirectory.dir("publications/${publication.name}").get().asFile
+            if (metadata.isDirectory()) {
+                metadata.eachFileRecurse { file ->
+                    if (file.isFile()) inspectFile(file.name, file.bytes, 0)
+                }
+            }
+        }
+    }
+}

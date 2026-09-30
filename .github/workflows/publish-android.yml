@@ -1,60 +1,26 @@
 name: Publish Android
-# Dispatched by Desktop release by default, or manually for a Maven-only release.
-# Desktop-only test releases explicitly skip this workflow.
+# Publishes all Android plugins after the same validation used by Android CI.
+# Credentials are supplied as environment variables only; never written into source.
 on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Tag to upload artifacts to"
+        description: 'Optional tag; dispatch this workflow on that same ref'
         required: false
-
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: maven-central-publication
+  cancel-in-progress: false
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3.5.3
-    - name: set up JDK
-      uses: actions/setup-java@v3.11.0
-      with:
-        distribution: 'temurin'
-        java-version: 17
-    - name: Write GPG Sec Ring
-      run: echo '${{ secrets.GPG_KEY_CONTENTS }}' | base64 -d > /tmp/secring.gpg
-    - name: Update gradle.properties
-      run: echo -e "signing.secretKeyRingFile=/tmp/secring.gpg\nsigning.keyId=${{ secrets.SIGNING_KEY_ID }}\nsigning.password=${{ secrets.SIGNING_PASSWORD }}\nmavenCentralPassword=${{ secrets.SONATYPE_NEXUS_PASSWORD }}\nmavenCentralUsername=${{ secrets.SONATYPE_NEXUS_USERNAME }}\nSONATYPE_HOST=DEFAULT\nRELEASE_SIGNING_ENABLED=true\nSONATYPE_AUTOMATIC_RELEASE=true" >> gradle.properties
-    - name: Compute build cache
-      run: ./scripts/checksum-android.sh checksum-android.txt
-    - uses: actions/cache@v3.3.1
-      with:
-        path: |
-          ~/.gradle/caches/modules-*
-          ~/.gradle/caches/jars-*
-          ~/.gradle/caches/build-cache-*
-        key: gradle-${{ hashFiles('checksum-android.txt') }}
-    - name: Build artifacts
-      run: ./gradlew :sample:assembleDebug :sample:assembleRelease && ./gradlew :android:assembleRelease
-    - name: Upload Archives
-      run: ./gradlew publish -info
-    - name: Clean secrets
-      if: always()
-      run: rm /tmp/secring.gpg
-    - name: Rename apk
-      run: mv android/sample/build/outputs/apk/debug/sample-debug.apk SampleApp-android.apk
-    - name: Attach sample APK to release
-      if: ${{ github.event.inputs.tag != '' }}
-      uses: aigoncharov/github-upload-release-artifacts-action@2.2.3
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        created_tag: ${{ github.event.inputs.tag }}
-        args: 'SampleApp-android.apk'
-    - name: Open issue on failure
-      if: failure()
-      uses: JasonEtco/create-an-issue@v2.4.0
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        REPOSITORY: ${{ github.repository }}
-        RUN_ID: ${{ github.run_id }}
-        WORKFLOW_NAME: "Publish Android"
-      with:
-        filename: .github/action-failure-template.md
+  publish:
+    uses: ./.github/workflows/android.yml
+    with:
+      publish: true
+      tag: ${{ inputs.tag }}
+    secrets:
+      MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+      MAVEN_CENTRAL_PASSWORD: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
+      MAVEN_SIGNING_KEY: ${{ secrets.MAVEN_SIGNING_KEY }}
+      MAVEN_SIGNING_PASSWORD: ${{ secrets.MAVEN_SIGNING_PASSWORD }}

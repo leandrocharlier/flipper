@@ -1,0 +1,34 @@
+/*
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * Licensed under the MIT license in the repository root.
+ */
+
+// Used by both the root Android build and the standalone React Native example.
+def repositoryRoot = project.ext.has('localSigningRepositoryRoot')
+    ? project.ext.localSigningRepositoryRoot : rootProject.projectDir
+def propertiesFile = new File(repositoryRoot, 'local.properties')
+def signingProperties = new Properties()
+if (propertiesFile.isFile()) {
+    propertiesFile.withInputStream { signingProperties.load(it) }
+}
+def prefix = "androidSigning.${project.ext.localSigningName}.".toString()
+def fields = ['storeFile', 'storePassword', 'keyAlias', 'keyPassword']
+def configured = fields.findAll { signingProperties.containsKey(prefix + it) }
+if (!configured.isEmpty()) {
+    if (configured.size() != fields.size()) {
+        throw new GradleException("Incomplete ${prefix} configuration in local.properties")
+    }
+    def keyFile = new File(repositoryRoot, signingProperties.getProperty(prefix + 'storeFile'))
+    if (!keyFile.isFile()) {
+        throw new GradleException("Missing local signing keystore for ${project.ext.localSigningName}")
+    }
+    android.signingConfigs.debug {
+        storeFile keyFile
+        storeType 'PKCS12'
+        storePassword signingProperties.getProperty(prefix + 'storePassword')
+        keyAlias signingProperties.getProperty(prefix + 'keyAlias')
+        keyPassword signingProperties.getProperty(prefix + 'keyPassword')
+    }
+}
+// Fresh clones without local configuration use AGP's machine-local debug key.
+// No shared keystore or password is distributed in the repository.

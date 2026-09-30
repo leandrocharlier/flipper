@@ -28,13 +28,16 @@ the packaged UI test in CI. Test the actual package with
 
 ## GitHub Actions
 
-The maintenance fork keeps four workflows:
+The maintenance fork keeps these workflows:
 
 - **Desktop CI**: TypeScript, the complete desktop Jest suite and process lifecycle
   checks on desktop changes/PRs, using Node.js 24. It does not publish artifacts.
 - **Validate Gradle Wrapper**: verifies the wrapper on pushes/PRs.
 - **Desktop release**: manual native builds/tests and GitHub publication.
-- **Publish Android**: manual Maven publishing, retained for separate setup and validation.
+- **Android CI**: builds all Android plugins and native dependencies, validates
+  16 KB alignment and checks a standalone Maven consumer.
+- **Publish Android**: manual Maven publishing after the complete Android checks.
+  See [Maven release setup](../android/MAVEN.md) for the required private configuration.
 
 Inherited Meta deployment/docs workflows, legacy package publishing and independent
 JS/iOS/React Native example workflows have been removed. Those projects remain in
@@ -53,11 +56,12 @@ skips; skipped tests must never be reported as passing tests.
 - `publish_android=true` is the normal default: dispatch Android/Maven publishing
   after the GitHub release. Maven credentials/signing and the Android publishing
   workflow must be validated separately before enabling it for a real release.
-- For desktop-only releases, including **0.3.0** and **1.0.0**, set `publish_android=false`.
+- For desktop-only releases, set `publish_android=false`. Desktop **0.3.0** and
+  **1.0.0** used this option; Android **1.0.0** was published separately afterward.
 - For a build rehearsal with no publication, also set `publish_release=false`.
 
-Creating a desktop tag does not independently trigger the inherited npm or
-CocoaPods publishers. Those remain manual workflows. Desktop release creates
+Creating a desktop tag does not publish inherited npm or CocoaPods packages.
+Desktop release creates
 its tag from the exact tested commit, not from a moving branch after the build.
 
 ## Distribution notices and privacy

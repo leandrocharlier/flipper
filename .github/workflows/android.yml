@@ -1,0 +1,99 @@
+name: Android CI
+on:
+  push:
+    branches: [main]
+    paths: ['android/**', 'xplat/**', 'gradle/**', '*.gradle', 'gradle.properties', 'scripts/**', '.github/workflows/android.yml']
+  pull_request:
+    paths: ['android/**', 'xplat/**', 'gradle/**', '*.gradle', 'gradle.properties', 'scripts/**', '.github/workflows/android.yml']
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      publish:
+        type: boolean
+        default: false
+      tag:
+        type: string
+        default: ''
+    secrets:
+      MAVEN_CENTRAL_USERNAME:
+        required: false
+      MAVEN_CENTRAL_PASSWORD:
+        required: false
+      MAVEN_SIGNING_KEY:
+        required: false
+      MAVEN_SIGNING_PASSWORD:
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  android:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Validate requested ref
+        if: inputs.publish && inputs.tag != ''
+        env:
+          REQUESTED_TAG: ${{ inputs.tag }}
+        run: test "$GITHUB_REF_NAME" = "$REQUESTED_TAG"
+      - name: Reject private files
+        run: |
+          python3 scripts/test-private-files.py
+          python3 scripts/check-private-files.py
+      - name: Check publication version and required secrets
+        if: inputs.publish
+        env:
+          CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+          CENTRAL_PASSWORD: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
+          SIGNING_KEY: ${{ secrets.MAVEN_SIGNING_KEY }}
+        run: |
+          python3 scripts/check-maven-central.py --expect unpublished
+          if [ -z "$CENTRAL_USERNAME" ] || [ -z "$CENTRAL_PASSWORD" ] || [ -z "$SIGNING_KEY" ]; then
+            echo 'Configure the Maven publishing secrets before dispatching publication.'
+            exit 1
+          fi
+      - name: Install native build prerequisites
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y make perl libtext-template-perl
+          sdkmanager 'platforms;android-34' 'build-tools;34.0.0' 'build-tools;36.0.0' 'ndk;25.1.8937393' 'ndk;27.2.12479018' 'cmake;3.22.1'
+      - name: Rebuild OpenSSL for every ABI
+        run: ANDROID_NDK_HOME="$ANDROID_HOME/ndk/27.2.12479018" JOBS=4 bash scripts/build-openssl-16k.sh
+      - name: Rebuild all native plugin dependencies
+        shell: pwsh
+        run: ./scripts/rebuild-sample-native.ps1 -Sdk $env:ANDROID_HOME
+      - name: Build and test every Android module
+        run: bash gradlew stageAndroidPublication testDebugUnitTest :sample:assembleDebug :tutorial:assembleDebug --max-workers=4 --console=plain
+      - name: Validate every Maven artifact and a standalone consumer
+        run: |
+          VERSION=$(sed -n 's/^VERSION_NAME=//p' gradle.properties | tr -d '\r')
+          python3 scripts/validate-maven-artifacts.py --version "$VERSION"
+          python3 scripts/create-maven-consumer.py --version "$VERSION"
+          bash gradlew -p work/maven-consumer assembleDebug assembleRelease verifyPublishedDependencyGraph --max-workers=4 --console=plain
+      - name: Validate APK native and ZIP alignment
+        shell: pwsh
+        run: |
+          ./scripts/check-apk-16k.ps1 -Apk android/sample/build/outputs/apk/debug/sample-debug.apk
+          ./scripts/check-apk-16k.ps1 -Apk android/tutorial/build/outputs/apk/debug/tutorial-debug.apk
+          ./scripts/check-apk-16k.ps1 -Apk work/maven-consumer/build/outputs/apk/debug/synthetic-maven-consumer-debug.apk
+      - name: Publish the complete signed set to Central
+        if: inputs.publish
+        env:
+          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
+          ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.MAVEN_SIGNING_KEY }}
+          ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.MAVEN_SIGNING_PASSWORD }}
+          ORG_GRADLE_PROJECT_signAllPublications: 'true'
+        run: |
+          test -n "$ORG_GRADLE_PROJECT_mavenCentralUsername"
+          test -n "$ORG_GRADLE_PROJECT_mavenCentralPassword"
+          test -n "$ORG_GRADLE_PROJECT_signingInMemoryKey"
+          bash gradlew stageAndroidPublication --no-configuration-cache --max-workers=4 --console=plain
+          python3 scripts/verify-maven-signatures.py
+          bash gradlew publishAndReleaseToMavenCentral --no-configuration-cache --max-workers=4 --console=plain

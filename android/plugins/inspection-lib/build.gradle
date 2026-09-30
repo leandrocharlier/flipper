@@ -5,5 +5,57 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-configurations.maybeCreate("default")
-artifacts.add("default", rootProject.file('android/third-party/generated-16k/inspection-16k.aar'))
+apply plugin: 'base'
+apply plugin: 'com.vanniktech.maven.publish.base'
+
+def artifactName = 'flipper-inspection-lib'
+def nativeRoot = rootProject.file('work/androidx/inspection/inspection/src/main/native')
+def notice = tasks.register('inspectionNotice') {
+    def output = layout.buildDirectory.file('notice/NOTICE-Community.txt')
+    outputs.file output
+    doLast {
+        output.get().asFile.parentFile.mkdirs()
+        output.get().asFile.text = 'AndroidX Inspection, Android Open Source Project, Apache-2.0.\nCommunity rebuild of libart_tooling for 16 KB page sizes. Java classes retained from the inspection-1.0.0.aar distributed with Flipper.\nNative sources: androidx/androidx commit 7149a4f1503ff96028c91e147e81bfacfef87eb2 and platform/tools/dexter commit d992a222ec28b56efa29f9104db060379298049c.\n'
+    }
+}
+def inspectionAar = tasks.register('inspectionAar', Zip) {
+    dependsOn notice
+    archiveBaseName = artifactName
+    archiveExtension = 'aar'
+    destinationDirectory = layout.buildDirectory.dir('distributions')
+    from({ zipTree(rootProject.file('android/third-party/generated-16k/inspection-16k.aar')) })
+    from(rootProject.file('android/native-artifacts/Apache-2.0.txt')) { into 'META-INF/licenses' }
+    from(layout.buildDirectory.dir('notice')) { into 'META-INF' }
+}
+artifacts.add('default', inspectionAar)
+def sources = tasks.register('inspectionSources', Jar) {
+    dependsOn notice
+    archiveBaseName = artifactName
+    archiveClassifier = 'sources'
+    from(nativeRoot) { include '**/*.cc', '**/*.h'; into 'inspection-native' }
+    from(rootProject.file('work/dexter/slicer')) { include '**/*.cc', '**/*.h'; into 'dexter-slicer' }
+    from(rootProject.file('scripts/native-16k/CMakeLists.txt')) { into 'community-build' }
+    from(rootProject.file('android/native-artifacts/Apache-2.0.txt'))
+    from(layout.buildDirectory.dir('notice'))
+}
+def documentation = tasks.register('inspectionDocumentation', Jar) {
+    dependsOn notice
+    archiveBaseName = artifactName
+    archiveClassifier = 'javadoc'
+    from(layout.buildDirectory.dir('notice'))
+    from(rootProject.file('android/native-artifacts/Apache-2.0.txt'))
+}
+mavenPublishing.coordinates(rootProject.GROUP, artifactName, rootProject.VERSION_NAME)
+publishing.publications.create('maven', MavenPublication) {
+    artifact inspectionAar
+    artifact sources
+    artifact documentation
+    pom {
+        name = 'Flipper Community AndroidX Inspection (16 KB)'
+        description = 'AndroidX Inspection with libart_tooling rebuilt for 16 KB page sizes, for the Flipper Compose plugin.'
+        url = 'https://github.com/leandrocharlier/flipper'
+        licenses { license { name = 'Apache-2.0'; url = 'https://www.apache.org/licenses/LICENSE-2.0.txt'; distribution = 'repo' } }
+        developers { developer { id = 'leandrocharlier'; name = 'Leandro Charlier' } }
+        scm { url = 'https://github.com/leandrocharlier/flipper'; connection = 'scm:git:https://github.com/leandrocharlier/flipper.git' }
+    }
+}
