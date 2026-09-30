@@ -1,0 +1,17 @@
+[
+  {
+    "name": "atom/node-keytar",
+    "file": "atom-node-keytar-LICENSE.txt",
+    "source": "https://api.github.com/repos/atom/node-keytar/git/blobs/493db50edda9d35fb7fdba7a0e10ed68c257ffb0"
+  },
+  {
+    "name": "robbiehanson/CocoaAsyncSocket",
+    "file": "robbiehanson-CocoaAsyncSocket-LICENSE.txt",
+    "source": "https://api.github.com/repos/robbiehanson/CocoaAsyncSocket/git/blobs/ed3d60f809df5886a184bb5936c39c2f4cbdf061"
+  },
+  {
+    "name": "rsms/peertalk",
+    "file": "rsms-peertalk-LICENSE.txt",
+    "source": "https://api.github.com/repos/rsms/peertalk/git/blobs/59ce36f9f4ebf1b8b9243f1089e7ed6fa9712b1f"
+  }
+]

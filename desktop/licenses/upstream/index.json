@@ -1,0 +1,380 @@
+{
+  "@algolia/cache-in-memory@4.27.0": {
+    "file": "algolia-algoliasearch-client-javascript-4-27-0-LICENSE-md.txt",
+    "source": "https://raw.githubusercontent.com/algolia/algoliasearch-client-javascript/4.27.0/LICENSE.md"
+  },
+  "@algolia/client-account@4.27.0": {
+    "file": "algolia-algoliasearch-client-javascript-4-27-0-LICENSE-md.txt",
+    "source": "https://raw.githubusercontent.com/algolia/algoliasearch-client-javascript/4.27.0/LICENSE.md"
+  },
+  "@algolia/cache-browser-local-storage@4.27.0": {
+    "file": "algolia-algoliasearch-client-javascript-4-27-0-LICENSE-md.txt",
+    "source": "https://raw.githubusercontent.com/algolia/algoliasearch-client-javascript/4.27.0/LICENSE.md"
+  },
+  "@algolia/cache-common@4.27.0": {
+    "file": "algolia-algoliasearch-client-js-4-27-0-LICENSE-md.txt",
+    "source": "https://raw.githubusercontent.com/algolia/algoliasearch-client-js/4.27.0/LICENSE.md"
+  },
+  "@algolia/client-personalization@4.27.0": {
+    "file": "algolia-algoliasearch-client-javascript-4-27-0-LICENSE-md.txt",
+    "source": "https://raw.githubusercontent.com/algolia/algoliasearch-client-javascript/4.27.0/LICENSE.md"
+  },
+  "@algolia/client-analytics@4.27.0": {
+    "file": "algolia-algoliasearch-client-javascript-4-27-0-LICENSE-md.txt",
+    "source": "https://raw.githubusercontent.com/algolia/algoliasearch-client-javascript/4.27.0/LICENSE.md"
+  },
+  "@algolia/client-common@4.27.0": {
+    "file": "algolia-algoliasearch-client-javascript-4-27-0-LICENSE-md.txt",
+    "source": "https://raw.githubusercontent.com/algolia/algoliasearch-client-javascript/4.27.0/LICENSE.md"
+  },
+  "@algolia/client-search@4.27.0": {
+    "file": "algolia-algoliasearch-client-javascript-4-27-0-LICENSE-md.txt",
+    "source": "https://raw.githubusercontent.com/algolia/algoliasearch-client-javascript/4.27.0/LICENSE.md"
+  },
+  "@algolia/logger-console@4.27.0": {
+    "file": "algolia-algoliasearch-client-javascript-4-27-0-LICENSE-md.txt",
+    "source": "https://raw.githubusercontent.com/algolia/algoliasearch-client-javascript/4.27.0/LICENSE.md"
+  },
+  "@algolia/logger-common@4.27.0": {
+    "file": "algolia-algoliasearch-client-js-4-27-0-LICENSE-md.txt",
+    "source": "https://raw.githubusercontent.com/algolia/algoliasearch-client-js/4.27.0/LICENSE.md"
+  },
+  "@algolia/recommend@4.27.0": {
+    "file": "algolia-algoliasearch-client-javascript-4-27-0-LICENSE-md.txt",
+    "source": "https://raw.githubusercontent.com/algolia/algoliasearch-client-javascript/4.27.0/LICENSE.md"
+  },
+  "@algolia/requester-browser-xhr@4.27.0": {
+    "file": "algolia-algoliasearch-client-javascript-4-27-0-LICENSE-md.txt",
+    "source": "https://raw.githubusercontent.com/algolia/algoliasearch-client-javascript/4.27.0/LICENSE.md"
+  },
+  "@algolia/requester-common@4.27.0": {
+    "file": "algolia-algoliasearch-client-js-4-27-0-LICENSE-md.txt",
+    "source": "https://raw.githubusercontent.com/algolia/algoliasearch-client-js/4.27.0/LICENSE.md"
+  },
+  "@algolia/transporter@4.27.0": {
+    "file": "algolia-algoliasearch-client-javascript-4-27-0-LICENSE-md.txt",
+    "source": "https://raw.githubusercontent.com/algolia/algoliasearch-client-javascript/4.27.0/LICENSE.md"
+  },
+  "@algolia/requester-node-http@4.27.0": {
+    "file": "algolia-algoliasearch-client-javascript-4-27-0-LICENSE-md.txt",
+    "source": "https://raw.githubusercontent.com/algolia/algoliasearch-client-javascript/4.27.0/LICENSE.md"
+  },
+  "@tanstack/react-virtual@3.0.0-beta.54": {
+    "file": "tanstack-virtual-4d5c3be436be56dd8026ae2cae5b74637f2a912f-LICENSE.txt",
+    "source": "https://raw.githubusercontent.com/tanstack/virtual/4d5c3be436be56dd8026ae2cae5b74637f2a912f/LICENSE"
+  },
+  "@tanstack/virtual-core@3.0.0-beta.54": {
+    "file": "tanstack-virtual-4d5c3be436be56dd8026ae2cae5b74637f2a912f-LICENSE.txt",
+    "source": "https://raw.githubusercontent.com/tanstack/virtual/4d5c3be436be56dd8026ae2cae5b74637f2a912f/LICENSE"
+  },
+  "algoliasearch@4.27.0": {
+    "file": "algolia-algoliasearch-client-javascript-4-27-0-LICENSE-md.txt",
+    "source": "https://raw.githubusercontent.com/algolia/algoliasearch-client-javascript/4.27.0/LICENSE.md"
+  },
+  "babel-plugin-syntax-jsx@6.18.0": {
+    "file": "babel-babel-v6-18-0-LICENSE.txt",
+    "source": "https://raw.githubusercontent.com/babel/babel/v6.18.0/LICENSE"
+  },
+  "babel-plugin-syntax-trailing-function-commas@7.0.0-beta.0": {
+    "file": "babel-babel-v7-0-0-beta-0-LICENSE.txt",
+    "source": "https://raw.githubusercontent.com/babel/babel/v7.0.0-beta.0/LICENSE"
+  },
+  "esbuild-windows-64@0.15.18": {
+    "file": "evanw-esbuild-2953831c60ea7e76dd1372204e23bdf7ff4ea459-LICENSE-md.txt",
+    "source": "https://raw.githubusercontent.com/evanw/esbuild/2953831c60ea7e76dd1372204e23bdf7ff4ea459/LICENSE.md"
+  },
+  "is-module@1.0.0": {
+    "file": "component-is-module-1-0-0-LICENSE.txt",
+    "source": "https://raw.githubusercontent.com/component/is-module/1.0.0/LICENSE"
+  },
+  "JSONSelect@0.2.1": {
+    "file": "lloyd-JSONSelect-0-2-1-LICENSE.txt",
+    "source": "https://raw.githubusercontent.com/lloyd/JSONSelect/0.2.1/LICENSE"
+  },
+  "metro-babel-transformer@0.70.4": {
+    "file": "facebook-metro-v0-70-4-LICENSE.txt",
+    "source": "https://raw.githubusercontent.com/facebook/metro/v0.70.4/LICENSE"
+  },
+  "metro-cache-key@0.70.4": {
+    "file": "facebook-metro-v0-70-4-LICENSE.txt",
+    "source": "https://raw.githubusercontent.com/facebook/metro/v0.70.4/LICENSE"
+  },
+  "metro-cache@0.70.4": {
+    "file": "facebook-metro-v0-70-4-LICENSE.txt",
+    "source": "https://raw.githubusercontent.com/facebook/metro/v0.70.4/LICENSE"
+  },
+  "metro-config@0.70.4": {
+    "file": "facebook-metro-v0-70-4-LICENSE.txt",
+    "source": "https://raw.githubusercontent.com/facebook/metro/v0.70.4/LICENSE"
+  },
+  "metro-core@0.70.4": {
+    "file": "facebook-metro-v0-70-4-LICENSE.txt",
+    "source": "https://raw.githubusercontent.com/facebook/metro/v0.70.4/LICENSE"
+  },
+  "metro-hermes-compiler@0.70.4": {
+    "file": "facebook-metro-v0-70-4-LICENSE.txt",
+    "source": "https://raw.githubusercontent.com/facebook/metro/v0.70.4/LICENSE"
+  },
+  "metro-inspector-proxy@0.70.4": {
+    "file": "facebook-metro-v0-70-4-LICENSE.txt",
+    "source": "https://raw.githubusercontent.com/facebook/metro/v0.70.4/LICENSE"
+  },
+  "metro-minify-uglify@0.70.4": {
+    "file": "facebook-metro-v0-70-4-LICENSE.txt",
+    "source": "https://raw.githubusercontent.com/facebook/metro/v0.70.4/LICENSE"
+  },
+  "metro-minify-terser@0.75.1": {
+    "file": "facebook-metro-77f445f1bcd2264ad06174dbf8d542bc75834d29-LICENSE.txt",
+    "source": "https://raw.githubusercontent.com/facebook/metro/77f445f1bcd2264ad06174dbf8d542bc75834d29/LICENSE"
+  },
+  "metro-react-native-babel-preset@0.70.4": {
+    "file": "facebook-metro-v0-70-4-LICENSE.txt",
+    "source": "https://raw.githubusercontent.com/facebook/metro/v0.70.4/LICENSE"
+  },
+  "metro-resolver@0.70.4": {
+    "file": "facebook-metro-v0-70-4-LICENSE.txt",
+    "source": "https://raw.githubusercontent.com/facebook/metro/v0.70.4/LICENSE"
+  },
+  "metro-runtime@0.70.4": {
+    "file": "facebook-metro-v0-70-4-LICENSE.txt",
+    "source": "https://raw.githubusercontent.com/facebook/metro/v0.70.4/LICENSE"
+  },
+  "metro-source-map@0.70.4": {
+    "file": "facebook-metro-v0-70-4-LICENSE.txt",
+    "source": "https://raw.githubusercontent.com/facebook/metro/v0.70.4/LICENSE"
+  },
+  "metro-symbolicate@0.70.4": {
+    "file": "facebook-metro-v0-70-4-LICENSE.txt",
+    "source": "https://raw.githubusercontent.com/facebook/metro/v0.70.4/LICENSE"
+  },
+  "metro-transform-plugins@0.70.4": {
+    "file": "facebook-metro-v0-70-4-LICENSE.txt",
+    "source": "https://raw.githubusercontent.com/facebook/metro/v0.70.4/LICENSE"
+  },
+  "metro-transform-worker@0.70.4": {
+    "file": "facebook-metro-v0-70-4-LICENSE.txt",
+    "source": "https://raw.githubusercontent.com/facebook/metro/v0.70.4/LICENSE"
+  },
+  "metro@0.70.4": {
+    "file": "facebook-metro-v0-70-4-LICENSE.txt",
+    "source": "https://raw.githubusercontent.com/facebook/metro/v0.70.4/LICENSE"
+  },
+  "ob1@0.70.4": {
+    "file": "facebook-metro-v0-70-4-LICENSE.txt",
+    "source": "https://raw.githubusercontent.com/facebook/metro/v0.70.4/LICENSE"
+  },
+  "react-devtools-core@6.0.1": {
+    "file": "facebook-react-c7c68ef842639f8535942b6247ef758221d289fb-LICENSE.txt",
+    "source": "https://raw.githubusercontent.com/facebook/react/c7c68ef842639f8535942b6247ef758221d289fb/LICENSE"
+  },
+  "react-devtools-inline@6.0.1": {
+    "file": "facebook-react-c7c68ef842639f8535942b6247ef758221d289fb-LICENSE.txt",
+    "source": "https://raw.githubusercontent.com/facebook/react/c7c68ef842639f8535942b6247ef758221d289fb/LICENSE"
+  },
+  "remark-parse@9.0.0": {
+    "file": "remarkjs-remark-9-0-0-LICENSE.txt",
+    "source": "https://raw.githubusercontent.com/remarkjs/remark/9.0.0/LICENSE"
+  },
+  "agent-base@6.0.2": {
+    "file": "TooTallNate-node-agent-base-c4b8ea2e1a11bae023bb09b708050a50418204e9-README-md.txt",
+    "source": "https://raw.githubusercontent.com/TooTallNate/node-agent-base/c4b8ea2e1a11bae023bb09b708050a50418204e9/README.md"
+  },
+  "@icons/material@0.2.4": {
+    "file": "at-icons-material-36b7eb9fe6819a795c799473d7c2f60b851f608f.txt",
+    "source": "https://api.github.com/repos/at-icons/material/git/blobs/36b7eb9fe6819a795c799473d7c2f60b851f608f",
+    "blobSha": "36b7eb9fe6819a795c799473d7c2f60b851f608f",
+    "licenseId": "MIT",
+    "projectLicense": true,
+    "declaredLicense": "MIT"
+  },
+  "@reach/observe-rect@1.2.0": {
+    "file": "-reach-observe-rect-1.2.0-declared-license.txt",
+    "source": "https://registry.npmjs.org/%40reach%2Fobserve-rect/1.2.0",
+    "licenseTextSource": "https://api.github.com/repos/spdx/license-list-data/git/blobs/d817195dad53ec992418c28ffca5fbd1cd86502a"
+  },
+  "brotli@1.3.3": {
+    "file": "brotli-1.3.3-declared-license.txt",
+    "source": "https://registry.npmjs.org/brotli/1.3.3",
+    "licenseTextSource": "https://api.github.com/repos/spdx/license-list-data/git/blobs/d817195dad53ec992418c28ffca5fbd1cd86502a"
+  },
+  "cookie-signature@1.0.7": {
+    "file": "visionmedia-node-cookie-signature-a2671bf753dfdc9caafbbfd3fe4a1ef6dabf15a5.txt",
+    "source": "https://api.github.com/repos/visionmedia/node-cookie-signature/git/blobs/a2671bf753dfdc9caafbbfd3fe4a1ef6dabf15a5",
+    "blobSha": "a2671bf753dfdc9caafbbfd3fe4a1ef6dabf15a5",
+    "licenseId": "MIT",
+    "projectLicense": true,
+    "declaredLicense": "MIT"
+  },
+  "denodeify@1.2.1": {
+    "file": "denodeify-1.2.1-declared-license.txt",
+    "source": "https://registry.npmjs.org/denodeify/1.2.1",
+    "licenseTextSource": "https://api.github.com/repos/spdx/license-list-data/git/blobs/d817195dad53ec992418c28ffca5fbd1cd86502a"
+  },
+  "estree-walker@1.0.1": {
+    "file": "Rich-Harris-estree-walker-63b62098eea9e1031659a145b1c6d752486ec0fe.txt",
+    "source": "https://api.github.com/repos/Rich-Harris/estree-walker/git/blobs/63b62098eea9e1031659a145b1c6d752486ec0fe",
+    "blobSha": "63b62098eea9e1031659a145b1c6d752486ec0fe",
+    "licenseId": "MIT",
+    "projectLicense": true,
+    "declaredLicense": "MIT"
+  },
+  "https-proxy-agent@5.0.1": {
+    "file": "TooTallNate-node-https-proxy-agent-d0d80cc0482f20495aa8595f802e1a9f3b1b3409-README-md.txt",
+    "source": "https://raw.githubusercontent.com/TooTallNate/node-https-proxy-agent/d0d80cc0482f20495aa8595f802e1a9f3b1b3409/README.md"
+  },
+  "inline-style-parser@0.1.1": {
+    "file": "remarkablemark-inline-style-parser-0239d9c6c02d5b622a68103b2eaa44c7817ff936.txt",
+    "source": "https://api.github.com/repos/remarkablemark/inline-style-parser/git/blobs/0239d9c6c02d5b622a68103b2eaa44c7817ff936",
+    "blobSha": "0239d9c6c02d5b622a68103b2eaa44c7817ff936",
+    "licenseId": "MIT",
+    "projectLicense": true,
+    "declaredLicense": "MIT"
+  },
+  "is-reference@1.2.1": {
+    "file": "is-reference-1.2.1-declared-license.txt",
+    "source": "https://registry.npmjs.org/is-reference/1.2.1",
+    "licenseTextSource": "https://api.github.com/repos/spdx/license-list-data/git/blobs/d817195dad53ec992418c28ffca5fbd1cd86502a"
+  },
+  "isarray@1.0.0": {
+    "file": "juliangruber-isarray-de3226673c3874b1c6506db022393c753495655c.txt",
+    "source": "https://api.github.com/repos/juliangruber/isarray/git/blobs/de3226673c3874b1c6506db022393c753495655c",
+    "blobSha": "de3226673c3874b1c6506db022393c753495655c",
+    "licenseId": "MIT",
+    "projectLicense": true,
+    "declaredLicense": "MIT"
+  },
+  "load-script@1.0.0": {
+    "file": "load-script-1.0.0-declared-license.txt",
+    "source": "https://registry.npmjs.org/load-script/1.0.0",
+    "licenseTextSource": "https://api.github.com/repos/spdx/license-list-data/git/blobs/d817195dad53ec992418c28ffca5fbd1cd86502a"
+  },
+  "react-virtualized-auto-sizer@1.0.7": {
+    "file": "bvaughn-react-virtualized-auto-sizer-b82ec77829ada9b6e82987f4c5fbc2043db28f49.txt",
+    "source": "https://api.github.com/repos/bvaughn/react-virtualized-auto-sizer/git/blobs/b82ec77829ada9b6e82987f4c5fbc2043db28f49",
+    "blobSha": "b82ec77829ada9b6e82987f4c5fbc2043db28f49",
+    "licenseId": "MIT",
+    "projectLicense": true,
+    "declaredLicense": "MIT"
+  },
+  "@ant-design/icons-svg@4.2.1": {
+    "file": "ant-design-ant-design-icons-dfe5c2183e82554ef991024afb81baac82c7e10a.txt",
+    "source": "https://api.github.com/repos/ant-design/ant-design-icons/git/blobs/dfe5c2183e82554ef991024afb81baac82c7e10a",
+    "blobSha": "dfe5c2183e82554ef991024afb81baac82c7e10a",
+    "licenseId": "MIT",
+    "projectLicense": true,
+    "declaredLicense": "MIT"
+  },
+  "array-tree-filter@2.1.0": {
+    "file": "afc163-array-tree-filter-639216d0674586baf24b8607f5123865b9cafb53.txt",
+    "source": "https://api.github.com/repos/afc163/array-tree-filter/git/blobs/639216d0674586baf24b8607f5123865b9cafb53",
+    "blobSha": "639216d0674586baf24b8607f5123865b9cafb53",
+    "licenseId": "MIT",
+    "projectLicense": true,
+    "declaredLicense": "MIT"
+  },
+  "bser@2.1.1": {
+    "file": "watchman-node-Apache-2.0.txt",
+    "source": "https://www.apache.org/licenses/LICENSE-2.0.txt",
+    "sourcePackage": "https://registry.npmjs.org/bser/-/bser-2.1.1.tgz"
+  },
+  "buffer-alloc-unsafe@1.1.0": {
+    "file": "LinusU-buffer-alloc-unsafe-e4bf1d69b1bb0df5acf1278e583264acdc1eefc5.txt",
+    "source": "https://api.github.com/repos/LinusU/buffer-alloc-unsafe/git/blobs/e4bf1d69b1bb0df5acf1278e583264acdc1eefc5",
+    "blobSha": "e4bf1d69b1bb0df5acf1278e583264acdc1eefc5",
+    "licenseId": "MIT",
+    "projectLicense": true,
+    "declaredLicense": "MIT"
+  },
+  "buffer-alloc@1.2.0": {
+    "file": "LinusU-buffer-alloc-e4bf1d69b1bb0df5acf1278e583264acdc1eefc5.txt",
+    "source": "https://api.github.com/repos/LinusU/buffer-alloc/git/blobs/e4bf1d69b1bb0df5acf1278e583264acdc1eefc5",
+    "blobSha": "e4bf1d69b1bb0df5acf1278e583264acdc1eefc5",
+    "licenseId": "MIT",
+    "projectLicense": true,
+    "declaredLicense": "MIT"
+  },
+  "buffer-fill@1.0.0": {
+    "file": "linusu-buffer-fill-e4bf1d69b1bb0df5acf1278e583264acdc1eefc5.txt",
+    "source": "https://api.github.com/repos/linusu/buffer-fill/git/blobs/e4bf1d69b1bb0df5acf1278e583264acdc1eefc5",
+    "blobSha": "e4bf1d69b1bb0df5acf1278e583264acdc1eefc5",
+    "licenseId": "MIT",
+    "projectLicense": true,
+    "declaredLicense": "MIT"
+  },
+  "colors@0.5.1": {
+    "file": "Marak-colors-js-17880ff02972b2c1ecdcf252f3fb32657a0cdc27.txt",
+    "source": "https://api.github.com/repos/Marak/colors.js/git/blobs/17880ff02972b2c1ecdcf252f3fb32657a0cdc27",
+    "blobSha": "17880ff02972b2c1ecdcf252f3fb32657a0cdc27",
+    "licenseId": "NOASSERTION",
+    "projectLicense": true,
+    "declaredLicense": "See package notices"
+  },
+  "fb-watchman@2.0.2": {
+    "file": "watchman-node-Apache-2.0.txt",
+    "source": "https://www.apache.org/licenses/LICENSE-2.0.txt",
+    "sourcePackage": "https://registry.npmjs.org/fb-watchman/-/fb-watchman-2.0.2.tgz"
+  },
+  "microseconds@0.2.0": {
+    "file": "kamicane-microseconds-2f98e7a1973245d8dddf9c5bed443840d7c0ff9b.txt",
+    "source": "https://api.github.com/repos/kamicane/microseconds/git/blobs/2f98e7a1973245d8dddf9c5bed443840d7c0ff9b",
+    "blobSha": "2f98e7a1973245d8dddf9c5bed443840d7c0ff9b",
+    "licenseId": "MIT",
+    "projectLicense": true,
+    "declaredLicense": "MIT"
+  },
+  "rc-virtual-list@3.10.4": {
+    "file": "react-component-virtual-list-d1c691b588027ef49643e2f50e7225e48aa55b88.txt",
+    "source": "https://api.github.com/repos/react-component/virtual-list/git/blobs/d1c691b588027ef49643e2f50e7225e48aa55b88",
+    "blobSha": "d1c691b588027ef49643e2f50e7225e48aa55b88",
+    "licenseId": "MIT",
+    "projectLicense": true,
+    "declaredLicense": "MIT"
+  },
+  "rc-virtual-list@3.2.2": {
+    "file": "react-component-virtual-list-d1c691b588027ef49643e2f50e7225e48aa55b88.txt",
+    "source": "https://api.github.com/repos/react-component/virtual-list/git/blobs/d1c691b588027ef49643e2f50e7225e48aa55b88",
+    "blobSha": "d1c691b588027ef49643e2f50e7225e48aa55b88",
+    "licenseId": "MIT",
+    "projectLicense": true,
+    "declaredLicense": "MIT"
+  },
+  "toggle-selection@1.0.6": {
+    "file": "sudodoki-toggle-selection-4a7395ee831dc1617bf5195dcb353c5bbd89afcd.txt",
+    "source": "https://api.github.com/repos/sudodoki/toggle-selection/git/blobs/4a7395ee831dc1617bf5195dcb353c5bbd89afcd",
+    "blobSha": "4a7395ee831dc1617bf5195dcb353c5bbd89afcd",
+    "licenseId": "MIT",
+    "projectLicense": true,
+    "declaredLicense": "MIT"
+  },
+  "tr46@0.0.3": {
+    "file": "Sebmaster-tr46-js-62c0de28a830d3ae3a006c9e1e7df19067e409a7.txt",
+    "source": "https://api.github.com/repos/Sebmaster/tr46.js/git/blobs/62c0de28a830d3ae3a006c9e1e7df19067e409a7",
+    "blobSha": "62c0de28a830d3ae3a006c9e1e7df19067e409a7",
+    "licenseId": "MIT",
+    "projectLicense": true,
+    "declaredLicense": "MIT"
+  },
+  "use-latest@1.2.1": {
+    "file": "Andarist-use-latest-13f0a2e49b08aca9d4b982de0d77e1924fb5a7da.txt",
+    "source": "https://api.github.com/repos/Andarist/use-latest/git/blobs/13f0a2e49b08aca9d4b982de0d77e1924fb5a7da",
+    "blobSha": "13f0a2e49b08aca9d4b982de0d77e1924fb5a7da",
+    "licenseId": "MIT",
+    "projectLicense": true,
+    "declaredLicense": "MIT"
+  },
+  "memoize-weak@1.0.2": {
+    "file": "memoize-weak-1.0.2-declared-license.txt",
+    "source": "https://registry.npmjs.org/memoize-weak/1.0.2",
+    "licenseTextSource": "https://api.github.com/repos/spdx/license-list-data/git/blobs/e80998f07690783bacce4ae55ff59c471d50cd75"
+  },
+  "nano-time@1.0.0": {
+    "file": "nano-time-1.0.0-declared-license.txt",
+    "source": "https://registry.npmjs.org/nano-time/1.0.0",
+    "licenseTextSource": "https://api.github.com/repos/spdx/license-list-data/git/blobs/e80998f07690783bacce4ae55ff59c471d50cd75"
+  },
+  "use-composed-ref@1.3.0": {
+    "file": "use-composed-ref-1.3.0-declared-license.txt",
+    "source": "https://registry.npmjs.org/use-composed-ref/1.3.0",
+    "licenseTextSource": "https://api.github.com/repos/spdx/license-list-data/git/blobs/d817195dad53ec992418c28ffca5fbd1cd86502a"
+  }
+}

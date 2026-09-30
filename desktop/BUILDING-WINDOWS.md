@@ -41,12 +41,12 @@ Or, after building the server, run `npm.cmd ci` and `npm.cmd run dist:win` from
 not replace the existing Yarn dependencies. The build produces these artifacts
 under `dist/electron`:
 
-- `Flipper-0.273.2-Windows-x64.exe`: per-user NSIS installer.
-- `Flipper-0.273.2-Windows-x64.zip`: portable folder containing `Flipper.exe`.
+- `Flipper-0.3.0-win-x64.exe`: per-user NSIS installer.
+- `Flipper-0.3.0-win-x64.zip`: portable folder containing `Flipper.exe`.
 
 Extract the entire ZIP before opening `Flipper.exe`. Node is bundled; Android SDK
 and OpenSSL still need to be installed as described above. The shell version is
-0.273.2; the embedded Flipper backend and plugin versions remain 0.273.0.
+0.3.0; the embedded Flipper backend and plugin versions remain 0.273.0.
 The binaries are unsigned. Code signing requires a certificate owned by the fork
 maintainer. No automatic update feed is configured.
 
@@ -115,10 +115,9 @@ The Windows packaged server must also be tested against the Android sample:
 secure certificate exchange, Network request/response bodies, and device log
 events. See `android/BUILDING-16KB.md` for building the full sample.
 
-These tests do not establish macOS compatibility. macOS still needs its own
-backend bundle, native libraries, packaging and execution tests on macOS. A macOS
-CI runner can build and run automated tests, but Windows cannot execute the Mac
-application. This work also
+The historical Windows checks do not establish macOS compatibility. The new
+[desktop release workflow](RELEASING.md) builds and tests each OS on its native
+runner; Windows cannot execute the Mac application. This work also
 does not constitute a complete security upgrade of all the archived project's
 dependencies.
 

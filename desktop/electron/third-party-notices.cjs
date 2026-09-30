@@ -53,12 +53,26 @@ function collectNotices(server) {
   const desktop=path.resolve(__dirname,'..');
   dependencies(path.join(desktop,'flipper-ui'));
   dependencies(path.join(desktop,'flipper-plugin'));
+  const shippedPlugins = new Set(fs.readdirSync(path.join(server, 'static', 'defaultPlugins')));
   for (const name of fs.readdirSync(path.join(desktop,'plugins/public'))) {
     const candidate=path.join(desktop,'plugins/public',name);
-    if(fs.existsSync(path.join(candidate,'package.json'))) dependencies(candidate);
+    const manifest = path.join(candidate, 'package.json');
+    if(fs.existsSync(manifest) && shippedPlugins.has(JSON.parse(fs.readFileSync(manifest, 'utf8')).name)) dependencies(candidate);
+  }
+  const upstreamDirectory = path.join(desktop, 'licenses', 'upstream');
+  const supplemental = JSON.parse(fs.readFileSync(path.join(upstreamDirectory, 'index.json'), 'utf8'));
+  for (const pkg of packages) {
+    const key = `${pkg.name}@${pkg.version}`;
+    const notice = supplemental[key] || (pkg.name.startsWith('esbuild-') && supplemental[`esbuild-windows-64@${pkg.version}`]);
+    if (notice) pkg.notices.push({file: notice.file, text: `Source: ${notice.source}\n\n${fs.readFileSync(path.join(upstreamDirectory, notice.file), 'utf8')}`});
+    if (!pkg.notices.length && pkg.name.startsWith('flipper-')) pkg.notices.push({file: 'Flipper-LICENSE', text: fs.readFileSync(path.join(desktop, '..', 'LICENSE'), 'utf8')});
+    if (!pkg.notices.length) throw new Error(`Missing third-party notice: ${key}`);
   }
   packages.sort((a,b) => `${a.name}@${a.version}`.localeCompare(`${b.name}@${b.version}`));
   const lines = ['Third-party notices for Flipper Community', 'Packages retain their original copyrights and licenses.\n'];
+  for (const notice of JSON.parse(fs.readFileSync(path.join(upstreamDirectory, 'native.json'), 'utf8'))) {
+    lines.push('='.repeat(80), notice.name, `Source: ${notice.source}`, fs.readFileSync(path.join(upstreamDirectory, notice.file), 'utf8'));
+  }
   for (const pkg of packages) {
     lines.push('='.repeat(80), `${pkg.name}@${pkg.version}`, `License: ${typeof pkg.license === 'string' ? pkg.license : JSON.stringify(pkg.license)}`, `Source: ${pkg.repository}`);
     for (const notice of pkg.notices) lines.push(`--- ${notice.file} ---`, notice.text);

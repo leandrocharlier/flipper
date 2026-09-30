@@ -1,0 +1,85 @@
+load-script@1.0.0
+License declared by the distributed package: MIT
+Source: https://registry.npmjs.org/load-script/1.0.0
+Author: ""
+Contributors: []
+
+# load-script
+
+Dynamic script loading.
+
+## Installation
+
+via component
+
+```
+$ component install eldargab/load-script
+```
+
+via npm
+
+```
+$ npm install load-script
+```
+
+## API
+`load-script` appends a `script` node to the `<head>` element in the dom.
+
+`require('load-script')` returns a function of the following interface:  `function(url[, opts][, cb]) {}`
+
+### url
+Any url that you would like to load.  May be absolute or relative.
+
+### [, opts]
+A map of options.  Here are the currently supported options:
+
+* `async` - A boolean value used for `script.async`.  By default this is `true`.
+* `attrs` - A map of attributes to set on the `script` node before appending it to the DOM.  By default this is empty.
+* `charset` - A string value used for `script.charset`.  By default this is `utf8`.
+* `text` - A string of text to append to the `script` node before it is appended to the DOM.  By default this is empty.
+* `type` - A string used for `script.type`.  By default this is `text/javascript`.
+
+### [, cb]
+A callback function of the following interface: `function(err, script) {}` where `err` is an error if any occurred and `script` is the `script` node that was appended to the DOM.
+
+## Example Usage
+
+```javascript
+var load = require('load-script')
+
+load('foo.js', function (err, script) {
+  if (err) {
+    // print useful message
+  }
+  else {
+    console.log(script.src);// Prints 'foo'.js'
+    // use script
+    // note that in IE8 and below loading error wouldn't be reported
+  }
+})
+```
+
+## License
+
+MIT
+
+
+Standard MIT license text (https://api.github.com/repos/spdx/license-list-data/git/blobs/d817195dad53ec992418c28ffca5fbd1cd86502a):
+MIT License
+
+Copyright (c) <year> <copyright holders>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+associated documentation files (the "Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the
+following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial
+portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO
+EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+USE OR OTHER DEALINGS IN THE SOFTWARE.

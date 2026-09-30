@@ -15,7 +15,8 @@ const executable = process.platform === 'win32'
     : path.join(directory, 'linux-unpacked', 'flipper');
 const delay = ms => new Promise(resolve=>setTimeout(resolve,ms));
 const log = fs.openSync(path.join(output, 'process.log'), 'w');
-const child = spawn(executable, ['--remote-debugging-port=19342', `--user-data-dir=${path.join(output, 'profile')}`], {stdio:['ignore',log,log], windowsHide:true});
+const profile = fs.mkdtempSync(path.join(output,'profile-'));
+const child = spawn(executable, ['--remote-debugging-port=19342', `--user-data-dir=${profile}`], {stdio:['ignore',log,log], windowsHide:true});
 let socket;
 const result = {platform:process.platform,arch:process.arch,version};
 let processError;
@@ -33,7 +34,7 @@ function send(method,params={}) {
 }
 async function run(expression) {
   const value=await send('Runtime.evaluate',{expression,returnByValue:true,awaitPromise:true});
-  if(value.exceptionDetails)throw new Error(value.exceptionDetails.text);
+  if(value.exceptionDetails)throw new Error(value.exceptionDetails.exception?.description || value.exceptionDetails.text);
   return value.result?.value;
 }
 async function wait(expression,label) {
@@ -60,7 +61,7 @@ async function wait(expression,label) {
   assert.equal(await run(`(() => {try{return typeof window.require('node:fs').readFileSync==='function'}catch{return false}})()`),false);
   result.rendererIsolation=true;
   const rows=Array.from({length:4100},(_,i)=>({date:new Date(1700000000000+i).toISOString(),pid:4242,tid:4243,tag:'ReleaseTest',type:i%2?'debug':'info',message:`Synthetic event ${i}\n`,count:1,pidStr:'4242',processName:'com.example.release'}));
-  const fixture={fileVersion:'0.273.0',clients:[],pluginStates2:{},deviceScreenshot:null,store:{activeNotifications:[]},device:{deviceType:'archivedPhysical',os:'Android',serial:'synthetic-release-test',title:'Synthetic release fixture',pluginStates:{DeviceLogs:{logs:rows}}}};
+  const fixture={fileVersion:'0.273.0',clients:[],pluginStates2:{},deviceScreenshot:null,store:{activeNotifications:[]},device:{deviceType:'physical',os:'Android',serial:'synthetic-release-test',title:'Synthetic release fixture',pluginStates:{DeviceLogs:{logs:rows}}}};
   await run(`(() => {const fixture=${JSON.stringify(fixture)};HTMLInputElement.prototype.click=function(){if(this.type==='file'){const transfer=new DataTransfer();transfer.items.add(new File([JSON.stringify(fixture)],'synthetic.flipper',{type:'application/json'}));this.files=transfer.files;this.dispatchEvent(new Event('change',{bubbles:true}));}};})()`);
   await run(`Array.from(document.querySelectorAll('.ant-menu-submenu-title')).find(e=>e.textContent.trim()==='More').dispatchEvent(new MouseEvent('mouseover',{bubbles:true}))`);
   await wait(`!!Array.from(document.querySelectorAll('[role="menuitem"]')).find(e=>e.textContent.trim()==='Import Flipper file')`,'Import menu missing');
@@ -68,7 +69,7 @@ async function wait(expression,label) {
   await wait(`(() => {const item=Array.from(document.querySelectorAll('.ant-menu-item .ant-typography')).find(e=>e.textContent==='Logs');item?.closest('.ant-menu-item')?.click();return !!document.querySelector('[aria-label="Logcat text"]') && document.querySelector('[role="status"]')?.textContent.includes((4100).toLocaleString());})()`,'Synthetic logs did not import');
   const viewer=`document.querySelector('[aria-label="Logcat text"]')`;
   assert.equal(await run(`getComputedStyle(${viewer}).whiteSpace`),'pre');
-  assert.ok(await run(`Array.from(${viewer}.children).every(row=>!row.lastElementChild.textContent.endsWith('\n\n'))`));
+  assert.ok(await run(`Array.from(${viewer}.children).every(row=>!row.lastElementChild.textContent.endsWith(String.fromCharCode(10,10)))`));
   await run(`document.querySelector('button[aria-label="Older logs"]').click()`);
   const anchor=await run(`(() => {const text=${viewer};const row=text.children[150];row.scrollIntoView({block:'start'});text.parentElement.dispatchEvent(new WheelEvent('wheel',{deltaY:-1,bubbles:true}));return {text:row.textContent,offset:row.getBoundingClientRect().top-text.parentElement.getBoundingClientRect().top};})()`);
   async function query(value,count) {
@@ -86,6 +87,12 @@ async function wait(expression,label) {
   const code=await Promise.race([exited,new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error('Packaged shutdown timed out')),15000);})]).finally(()=>clearTimeout(timer));
   assert.equal(code,0);
   result.shutdown=true;result.passed=true;
-})().catch(error=>{result.error=error.message;process.exitCode=1;child.kill();}).finally(()=>{
+})().catch(async error=>{
+  result.error=error.message;process.exitCode=1;
+  if(socket?.readyState===WebSocket.OPEN) {
+    try {fs.writeFileSync(path.join(output,'synthetic-ui.txt'),await run('document.body.innerText'));}catch{}
+  }
+  child.kill();
+}).finally(()=>{
   socket?.close();fs.closeSync(log);fs.writeFileSync(path.join(output,'result.json'),JSON.stringify(result,null,2));console.log(JSON.stringify(result));
 });
