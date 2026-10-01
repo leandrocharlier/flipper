@@ -7,33 +7,38 @@ import useBaseUrl from '@docusaurus/useBaseUrl';
 import Link from '@docusaurus/Link';
 
 :::note
-The information within this page is meant for people manually adding Flipper to a React Native 0.62+ app.
-This should only be necessary if you have an existing app that cannot be upgraded with the [React Native Upgrade tool](https://reactnative.dev/docs/upgrading).
+This page describes the legacy `ReactInstanceManager` integration used by this
+repository's React Native example. The Maven coordinates below are for Flipper
+Community 1.0.0. Updating coordinates alone does not validate compatibility with
+other React Native versions, the New Architecture, or Expo SDKs.
 :::
 
 ## Dependencies
 
 Flipper is distributed via Maven Central: add the dependencies to your `build.gradle` file.
 
-You should also explicitly depend on [SoLoader`](https://github.com/facebook/soloader) instead of relying on transitive dependency resolution, which is getting deprecated with Gradle 5.
+Use the SoLoader and FBJNI versions supplied by your React Native application;
+check its resolved dependency graph before applying exclusions.
 
 ```groovy
 repositories {
+  google()
   mavenCentral()
 }
 
 dependencies {
-  debugImplementation('com.facebook.flipper:flipper:0.35.0') {
+  debugImplementation('io.github.leandrocharlier.flipper:flipper:1.0.0') {
     exclude group:'com.facebook.fbjni'
   }
 
-  debugImplementation('com.facebook.flipper:flipper-network-plugin:0.35.0') {
-    exclude group:'com.facebook.flipper'
-  }
+  debugImplementation 'io.github.leandrocharlier.flipper:flipper-network-plugin:1.0.0'
 }
 ```
 
-These exclusions are currently necessary to avoid some clashes with FBJNI shared libraries.
+The FBJNI exclusion above assumes React Native already supplies FBJNI. Remove any
+upstream `com.facebook.flipper` SDK dependencies, including those added by other
+packages. Java imports keep the `com.facebook.flipper.*` names. Native setup needs
+to be checked in a built Android application; these are not Expo Go instructions.
 
 ## Application Setup
 
@@ -55,6 +60,7 @@ public class ReactNativeFlipper {
       final FlipperClient client = AndroidFlipperClient.getInstance(context);
 
       client.addPlugin(new InspectorFlipperPlugin(context, DescriptorMapping.withDefaults()));
+      client.start();
     }
   }
 }

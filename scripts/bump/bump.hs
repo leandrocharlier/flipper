@@ -29,14 +29,13 @@ import qualified Control.Foldl as F
 releaseReplacements :: [(FilePath, Pattern Version)]
 releaseReplacements =
   [("gradle.properties", "VERSION_NAME=" *> anyVersion)
-  ,("docs/getting-started/android-native.mdx", spaces >> "debugImplementation 'com.facebook.flipper:flipper:" *> releaseVersion <* "'")
-  ,("docs/getting-started/android-native.mdx", spaces >> "releaseImplementation 'com.facebook.flipper:flipper-noop:" *> releaseVersion <* "'")
-  ,("docs/getting-started/react-native-android.mdx", spaces >> "debugImplementation 'com.facebook.flipper:flipper:" *> releaseVersion <* "'")
-  ,("docs/getting-started/react-native-android.mdx", spaces >> "debugImplementation 'com.facebook.flipper:flipper-network-plugin:" *> releaseVersion <* "'")
-  ,("desktop/plugins/public/leak_canary/docs/setup.mdx", spaces >> "debugImplementation 'com.facebook.flipper:flipper-leakcanary2-plugin:" *> releaseVersion <* "'")
-  ,("desktop/plugins/public/layout/docs/setup.mdx", spaces >> "debugImplementation 'com.facebook.flipper:flipper-litho-plugin:" *> releaseVersion <* "'")
-  ,("desktop/plugins/public/network/docs/setup.mdx", spaces >> "debugImplementation 'com.facebook.flipper:flipper-network-plugin:" *> releaseVersion <* "'")
-  ,("desktop/plugins/public/fresco/docs/setup.mdx", spaces >> "debugImplementation 'com.facebook.flipper:flipper-images-plugin:" *> releaseVersion <* "'")
+  ,("docs/getting-started/android-native.mdx", spaces >> "debugImplementation 'io.github.leandrocharlier.flipper:flipper:" *> releaseVersion <* "'")
+  ,("docs/getting-started/android-native.mdx", spaces >> "releaseImplementation 'io.github.leandrocharlier.flipper:flipper-noop:" *> releaseVersion <* "'")
+  ,("docs/getting-started/react-native-android.mdx", spaces >> "debugImplementation('io.github.leandrocharlier.flipper:flipper:" *> releaseVersion <* "'")
+  ,("docs/getting-started/react-native-android.mdx", spaces >> "debugImplementation 'io.github.leandrocharlier.flipper:flipper-network-plugin:" *> releaseVersion <* "'")
+  ,("desktop/plugins/public/leak_canary/docs/setup.mdx", spaces >> "debugImplementation 'io.github.leandrocharlier.flipper:flipper-leakcanary2-plugin:" *> releaseVersion <* "'")
+  ,("desktop/plugins/public/layout/docs/setup.mdx", spaces >> "debugImplementation 'io.github.leandrocharlier.flipper:flipper-litho-plugin:" *> releaseVersion <* "'")
+  ,("desktop/plugins/public/network/docs/setup.mdx", spaces >> "debugImplementation 'io.github.leandrocharlier.flipper:flipper-network-plugin:" *> releaseVersion <* "'")
   ,("docs/getting-started/react-native-ios.mdx", spaces >> "use_flipper!('Flipper' => '" *> releaseVersion <* "')" <* many anyChar)
   ,("docs/getting-started/react-native-ios.mdx", spaces >> "flipperkit_version = '" *> releaseVersion <* "'" <* many anyChar)
   ,("docs/getting-started/react-native.mdx", many anyChar >> "`FLIPPER_VERSION=" *> releaseVersion <* "`.")
@@ -46,8 +45,6 @@ releaseReplacements =
 snapshotReplacements :: [(FilePath, Pattern Version)]
 snapshotReplacements =
   [("gradle.properties", "VERSION_NAME=" *> anyVersion)
-  ,("docs/getting-started/android-native.mdx", spaces >> "debugImplementation 'com.facebook.flipper:flipper:" *> snapshotVersion <* "'")
-  ,("docs/getting-started/android-native.mdx", spaces >> "releaseImplementation 'com.facebook.flipper:flipper-noop:" *> snapshotVersion <* "'")
   ]
 
 flipperPath :: FilePath -> FilePath

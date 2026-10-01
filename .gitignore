@@ -64,6 +64,10 @@ docs/features/plugins/
 website/src/embedded-pages/docs/plugins/
 
 # Logs
+*.log
+*.log.*
+*.binlog
+flipper-server-log.out
 **/*/flipper-server-log.out
 
 *.salive

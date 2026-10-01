@@ -1,0 +1,6 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+  <!-- HTTP is used only for the synthetic loopback test server. -->
+  <application android:usesCleartextTraffic="true">
+    <activity android:name=".PluginFixtureActivity" android:exported="true" />
+  </application>
+</manifest>

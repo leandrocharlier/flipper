@@ -11,9 +11,29 @@ The Fresco Images plugin is shipped as a separate Maven artifact:
 
 ```groovy
 dependencies {
-  debugImplementation 'com.facebook.flipper:flipper-fresco-plugin:0.30.1'
+  debugImplementation 'io.github.leandrocharlier.flipper:flipper:1.0.0'
+  debugImplementation('com.facebook.fresco:flipper-fresco-plugin:3.1.3') {
+    exclude group: 'com.facebook.flipper', module: 'flipper'
+  }
+  debugImplementation 'io.github.leandrocharlier.flipper:flipper-imagepipeline-native:1.0.0'
+  debugImplementation 'io.github.leandrocharlier.flipper:flipper-nativeimagefilters:1.0.0'
+  debugImplementation 'io.github.leandrocharlier.flipper:flipper-nativeimagetranscoder:1.0.0'
+}
+
+configurations.configureEach {
+  if (name.toLowerCase().contains('debug')) {
+    exclude group: 'com.facebook.fresco', module: 'imagepipeline-native'
+    exclude group: 'com.facebook.fresco', module: 'nativeimagefilters'
+    exclude group: 'com.facebook.fresco', module: 'nativeimagetranscoder'
+  }
 }
 ```
+
+Use `google()` and `mavenCentral()`. Keep the Fresco Java dependencies compatible
+with 3.1.3. The Images plugin itself is maintained in Fresco; there is no
+`io.github.leandrocharlier.flipper:flipper-fresco-plugin` artifact. These exclusions
+apply to debug builds; an app shipping Fresco in release must separately validate
+its release native libraries for 16 KB support.
 
 After including the plugin in your dependencies, you can add it to the client:
 

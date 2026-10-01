@@ -1,0 +1,71 @@
+// Disposable consumer tests. Every Flipper binary comes from the configured Maven repository.
+android {
+    defaultConfig {
+        applicationId 'com.example.flipper.mavenvalidation.integration'
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+    }
+    testBuildType = providers.gradleProperty('consumerTestBuildType').getOrElse('debug')
+    buildFeatures { compose true }
+    composeOptions { kotlinCompilerExtensionVersion '1.5.13' }
+    kotlinOptions { jvmTarget = '17' }
+    // Test-only release APK uses the existing local signing configuration, never an embedded key.
+    buildTypes { release { debuggable true; applicationIdSuffix '.release'; signingConfig signingConfigs.debug } }
+    sourceSets.androidTest.java.srcDirs = [testBuildType == 'release' ? 'src/noopTest/java' : 'src/pluginTest/java']
+}
+
+dependencies {
+    def sdkVersion = configurations.debugImplementation.dependencies.find { it.name == 'flipper' }.version
+    debugImplementation 'org.jetbrains.kotlin:kotlin-stdlib:1.9.23'
+    debugImplementation 'com.squareup.okhttp3:okhttp:4.12.0'
+    debugImplementation 'com.facebook.soloader:soloader:0.10.4'
+    debugImplementation 'androidx.activity:activity-compose:1.8.2'
+    debugImplementation 'androidx.compose.foundation:foundation:1.6.7'
+    debugImplementation('com.facebook.fresco:flipper-fresco-plugin:3.1.3') {
+        exclude group: 'com.facebook.flipper', module: 'flipper'
+        exclude group: 'com.facebook.fresco', module: 'imagepipeline-native'
+        exclude group: 'com.facebook.fresco', module: 'nativeimagefilters'
+        exclude group: 'com.facebook.fresco', module: 'nativeimagetranscoder'
+    }
+    androidTestCompileOnly 'com.facebook.fresco:fresco:3.1.3'
+    androidTestCompileOnly 'com.facebook.fresco:ui-common:3.1.3'
+    debugImplementation('com.facebook.litho:litho-widget:0.50.1') {
+        exclude group: 'com.facebook.yoga', module: 'yoga'
+        exclude group: 'com.facebook.litho', module: 'litho-flexlayout'
+    }
+    androidTestImplementation 'androidx.test:runner:1.5.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test:rules:1.5.0'
+    androidTestImplementation 'com.squareup.okhttp3:mockwebserver:4.12.0'
+    androidTestImplementation 'com.squareup.okhttp3:okhttp-tls:4.12.0'
+    // Public APIs used directly by the tests, matching the SDK's supported dependencies.
+    androidTestImplementation 'com.facebook.soloader:soloader:0.10.4'
+    androidTestImplementation 'com.google.protobuf:protobuf-java:3.25.3'
+    androidTestImplementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    // These are already runtime dependencies of the app; expose them to test compilation.
+    androidTestCompileOnly "io.github.leandrocharlier.flipper:flipper-yoga:${sdkVersion}"
+    androidTestCompileOnly "io.github.leandrocharlier.flipper:flipper-flexlayout:${sdkVersion}"
+    androidTestCompileOnly 'androidx.compose.ui:ui-android:1.6.7'
+    androidTestCompileOnly 'com.facebook.fresco:imagepipeline-base:3.1.3'
+    androidTestCompileOnly 'com.facebook.infer.annotation:infer-annotation:0.18.0'
+}
+
+tasks.register('verifyCompletePublicationGraph') {
+    doLast {
+        def expected = ['flipper', 'flipper-network-plugin', 'flipper-litho-plugin',
+            'flipper-leakcanary-plugin', 'flipper-leakcanary2-plugin',
+            'flipper-retrofit2-protobuf-plugin', 'flipper-jetpack-compose-plugin',
+            'flipper-openssl', 'flipper-yoga', 'flipper-flexlayout',
+            'flipper-imagepipeline-native', 'flipper-nativeimagefilters',
+            'flipper-nativeimagetranscoder', 'flipper-inspection-lib'] as Set
+        def debugIds = configurations.debugRuntimeClasspath.resolvedConfiguration.resolvedArtifacts.collect { it.moduleVersion.id }
+        def version = configurations.debugImplementation.dependencies.find { it.name == 'flipper' }.version
+        assert debugIds.findAll { it.group == 'io.github.leandrocharlier.flipper' }.every { it.version == version }
+        def actual = debugIds.findAll { it.group == 'io.github.leandrocharlier.flipper' }.collect { it.name } as Set
+        assert actual == expected : "Missing/unexpected published modules: ${expected - actual} / ${actual - expected}"
+        def releaseIds = configurations.releaseRuntimeClasspath.resolvedConfiguration.resolvedArtifacts.collect { it.moduleVersion.id }
+        assert releaseIds.find { it.name == 'flipper-noop' }.version == version
+        assert releaseIds.collect { it.group + ':' + it.name }.toSet() ==
+            ['io.github.leandrocharlier.flipper:flipper-noop', 'com.google.code.findbugs:jsr305'].toSet()
+        println 'PASS: all 14 debug artifacts resolved; release contains only flipper-noop and annotations (15/15)'
+    }
+}

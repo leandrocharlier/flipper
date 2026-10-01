@@ -69,6 +69,64 @@ check SDK startup. After Central publication, regenerate it with `--central-only
 and repeat dependency resolution and compilation. Unit tests and an aggregate
 consumer do not replace real-device integration tests for every optional plugin.
 
+### Published dependency integration tests
+
+Local validation of Maven **1.0.0** on September 30, 2026 passed **22 debug tests
+and 1 no-op test** on Android 15 x86_64 with 16 KB pages. The Windows v1.0.0 release
+server also passed the SDK connection, plugin RPC, HTTP response and log roundtrip.
+All 28 arm64/x86_64 native libraries in the consumer APK passed ELF alignment,
+and the APK passed ZIP alignment. This is the tested matrix, not a guarantee for
+other devices or framework versions. React Native example coordinates were
+updated, but the legacy React Native application was not built in this validation.
+
+The consumer can include repeatable device tests against the actual Central
+binaries, without rebuilding or substituting SDK projects:
+
+```text
+python scripts/create-maven-consumer.py --version 1.0.0 --central-only --integration-tests
+gradlew -p work/maven-consumer connectedDebugAndroidTest verifyPublishedDependencyGraph verifyCompletePublicationGraph
+gradlew -p work/maven-consumer -PconsumerTestBuildType=release connectedReleaseAndroidTest
+```
+
+Use a connected Android 15 x86_64 emulator configured with 16 KB pages. The debug
+suite checks page size, SDK registration, HTTP/HTTPS interception with a trusted
+ephemeral test certificate, both LeakCanary report formats, Retrofit protobuf
+schemas, Sections events, rendered Compose/Litho inspection, SQLite, preferences,
+navigation, crash reports, sandbox selection, the legacy React compatibility
+stub, Fresco Images cache enumeration, and native image/layout operations.
+All 14 debug modules must resolve at the requested version. Release must contain
+only the no-op SDK and annotations, with no native libraries in its APK.
+
+The integration fixture enables Kotlin/Compose and uses Compose 1.6.7, Litho
+0.50.1 and Fresco 3.1.3, matching the supported sample setup. A Java-only
+consumer that does not enable Kotlin Android can resolve Compose's multiplatform
+metadata instead of Android classes; enable Kotlin Android when testing Compose.
+The no-op exposes a subset of the SDK API, as documented in the Android setup
+guide. These tests do not claim compatibility with every Compose, Fresco, React
+Native or Android version. LeakCanary tests supply synthetic analyzed reports;
+they do not perform an actual heap dump or verify automatic leak detection.
+
+For a real desktop-server roundtrip, install the generated debug APK, close any
+running Flipper instance, and run:
+
+```text
+adb install -r work/maven-consumer/build/outputs/apk/debug/synthetic-maven-consumer-debug.apk
+node scripts/test-maven-desktop.cjs PATH_TO_DESKTOP_RELEASE/resources/server
+```
+
+This starts and stops its own server, checks the published client's connection,
+plugin RPC, Network request/response and synthetic log delivery. It uses only a
+loopback HTTP endpoint. `ANDROID_SERIAL` selects the emulator (default:
+`emulator-5554`), and `ADB` can specify the executable. Test results and generated
+apps stay under ignored `work/`. The test release APK is debuggable and signed
+with the existing machine-local app signing configuration solely to run tests;
+it is not a production application or a published artifact.
+
+Execution on x86_64 does not replace execution on a physical arm64 device. Use
+`scripts/check-apk-16k.ps1` to additionally check every arm64/x86_64 ELF and APK
+ZIP alignment; a static arm64 check is not an arm64 runtime test. The desktop
+roundtrip exercises the release server, not every plugin's desktop UI or macOS.
+
 Only a complete, signed set of all 15 artifacts can be released. Each publication
 includes sources, documentation/license notices and its POM. Native sources are
 pinned and rebuilt with all four ABIs; native documentation jars contain notices,

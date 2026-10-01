@@ -20,14 +20,15 @@ There is a 'no-op' implementation of some oft-used Flipper interfaces, which you
 
 ```groovy
 repositories {
+  google()
   mavenCentral()
 }
 
 dependencies {
-  debugImplementation 'com.facebook.flipper:flipper:0.273.0'
-  debugImplementation 'com.facebook.soloader:soloader:0.10.5'
+  debugImplementation 'io.github.leandrocharlier.flipper:flipper:1.0.0'
+  debugImplementation 'com.facebook.soloader:soloader:0.10.4'
 
-  releaseImplementation 'com.facebook.flipper:flipper-noop:0.273.0'
+  releaseImplementation 'io.github.leandrocharlier.flipper:flipper-noop:1.0.0'
 }
 ```
 
@@ -35,7 +36,7 @@ dependencies {
 The `flipper-noop` package provides a limited subset of the APIs provided by the `flipper` package and does not provide any plugin stubs.
 It's recommended that you keep all Flipper instantiation code in a separate build variant to ensure it doesn't accidentally make it into your production builds.
 
-To see how to organise your Flipper initialization into debug and release variants, check this [sample app](https://github.com/facebook/flipper/tree/main/android/sample/src).
+To see how to organise your Flipper initialization into debug and release variants, check this [sample app](https://github.com/leandrocharlier/flipper/tree/main/android/sample/src).
 
 Alternatively, have a look at the third-party [flipper-android-no-op](https://github.com/theGlenn/flipper-android-no-op) repository, which provides empty implementations for several Flipper plugins.
 :::
@@ -110,26 +111,16 @@ It's recommended that you add the following activity to the manifest, which can 
         android:exported="true"/>
 ```
 
-## Android snapshots
+## Community releases
 
-:::note
-Android snapshot releases are published directly off `main`.
-:::
+This fork publishes stable Android releases to Maven Central under
+`io.github.leandrocharlier.flipper`. No Sonatype repository or credentials are
+needed by consumers. Snapshots are not currently published.
 
-You can get the latest version by adding the Maven Snapshot repository to your sources and pointing to the most recent `-SNAPSHOT` version.
-
-```groovy
-repositories {
-  maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
-}
-
-dependencies {
-  debugImplementation 'com.facebook.flipper:flipper:0.273.1-SNAPSHOT'
-  debugImplementation 'com.facebook.soloader:soloader:0.10.5'
-
-  releaseImplementation 'com.facebook.flipper:flipper-noop:0.273.1-SNAPSHOT'
-}
-```
+Keep Java/Kotlin imports under `com.facebook.flipper.*`, but remove upstream
+`com.facebook.flipper` Maven dependencies to avoid duplicate classes.
+For AGP 8.2, set `android.packagingOptions.jniLibs.useLegacyPackaging = true`
+and verify the final APK on a 16 KB device.
 
 ## Enabling plugins
 
