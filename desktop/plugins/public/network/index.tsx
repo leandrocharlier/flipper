@@ -486,9 +486,13 @@ export function plugin(client: PluginClient<Events, Methods>) {
         </>
       );
     },
-    onCopyText(text: string) {
-      client.writeTextToClipboard(text);
-      message.success('Text copied to clipboard');
+    async onCopyText(text: string) {
+      try {
+        await client.writeTextToClipboard(text);
+        message.success('Text copied to clipboard');
+      } catch {
+        message.error('Could not copy text to clipboard. Please try again.');
+      }
     },
     addCustomColumn,
   };

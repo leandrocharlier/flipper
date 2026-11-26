@@ -4,6 +4,7 @@ const path = require('node:path');
 const fs = require('node:fs');
 const {ServerProcess} = require('./server-process.cjs');
 const {serverDirectory} = require('./platform.cjs');
+const {configurePermissions} = require('./permissions.cjs');
 const desktopVersion = require('./package.json').version;
 
 const ORIGIN = 'http://localhost:52342';
@@ -57,10 +58,7 @@ async function createDesktop({
     event.preventDefault();
     window.setTitle(`Flipper Community ${desktopVersion}`);
   });
-  session.setPermissionCheckHandler(() => false);
-  session.setPermissionRequestHandler((_contents, _permission, callback) =>
-    callback(false),
-  );
+  configurePermissions(window, ORIGIN);
   window.webContents.setWindowOpenHandler(({url}) => {
     if (isExternalLink(url) && !isInternal(url))
       shell.openExternal(url).catch(onFailure);

@@ -109,7 +109,7 @@ export interface FlipperLib {
     pluginId: string,
     deeplink: unknown,
   ): void;
-  writeTextToClipboard(text: string): void;
+  writeTextToClipboard(text: string): void | Promise<void>;
   openLink(url: string): void;
   showNotification(pluginKey: string, notification: Notification): void;
   DetailsSidebarImplementation?(props: {

@@ -135,9 +135,10 @@ export interface BasePluginClient<
   showNotification(notification: Notification): void;
 
   /**
-   * Writes text to the clipboard of the Operating System
+   * Writes text to the clipboard of the Operating System. Await completion before
+   * reporting success; browser clipboard permissions can reject the operation.
    */
-  writeTextToClipboard(text: string): void;
+  writeTextToClipboard(text: string): void | Promise<void>;
 
   /**
    * Logger instance that logs information to the console, but also to the internal logging (in FB only builds) and which can be used to track performance.

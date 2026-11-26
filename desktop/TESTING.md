@@ -1,7 +1,7 @@
 # Release validation
 
 Every desktop release runs the complete root Jest suite, Electron process tests,
-backend lifecycle tests and the packaged application smoke test on Windows x64,
+backend lifecycle tests, native clipboard checks and the packaged application smoke test on Windows x64,
 Linux x64, macOS Intel and macOS Apple Silicon. Do not select only the plugins
 used by the maintainer. From `desktop`, run `yarn test --runInBand` after installing
 dependencies, then follow `RELEASING.md` for the native package checks.
@@ -14,6 +14,14 @@ starts a real mock server, checks external-file change detection, reloads saved
 edits, and stops the server. Mock API tests use an isolated storage directory.
 Private user captures and any data derived from them are forbidden in remote
 tests, source control, release packages and uploaded diagnostics.
+
+The clipboard test (`npm --prefix electron run test:clipboard`) launches an
+isolated Electron window with the application's permission policy. It reproduces
+the old denied write, checks a synthetic multiline Unicode body against the native
+clipboard, and verifies that renderer clipboard reads remain denied. Network unit
+tests exercise both copy icons and success/error notifications. The native test
+preserves clipboard formats in memory and restores them on completion; it never
+writes clipboard contents to files. Run it in a desktop session (Xvfb on Linux CI).
 
 ## Existing coverage limits
 

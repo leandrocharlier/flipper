@@ -16,6 +16,7 @@ yarn build:flipper-server --desktop
 npm --prefix electron ci
 npm --prefix electron test
 npm --prefix electron run test:server
+npm --prefix electron run test:clipboard
 yarn test --runInBand
 ```
 
@@ -57,7 +58,7 @@ skips; skipped tests must never be reported as passing tests.
   after the GitHub release. Maven credentials/signing and the Android publishing
   workflow must be validated separately before enabling it for a real release.
 - For desktop-only releases, set `publish_android=false`. Desktop **0.3.0** and
-  **1.0.0** used this option; Android **1.0.0** was published separately afterward.
+  **1.0.0** and **1.0.1** use this option; Android **1.0.0** was published separately.
 - For a build rehearsal with no publication, also set `publish_release=false`.
 
 Creating a desktop tag does not publish inherited npm or CocoaPods packages.

@@ -19,8 +19,10 @@
 This is [Leandro Charlier's maintenance fork](https://github.com/leandrocharlier/flipper)
 of the archived Meta Flipper project. Its current focus is native Android
 debugging, especially **Network and Logs**, with a standalone desktop app.
-Community version **1.0.0** includes Mock API and native desktop builds for Windows,
-macOS (Intel and Apple Silicon), and Linux. See [desktop release instructions](desktop/RELEASING.md).
+Community desktop version **1.0.1** fixes copying Network request/response bodies
+and includes Mock API and native builds for Windows, macOS (Intel and Apple Silicon),
+and Linux. See [release notes](desktop/releases/1.0.1.md) and
+[desktop release instructions](desktop/RELEASING.md).
 This fork is independent and is not an official Meta release. The original
 MIT license and copyright notices are retained; see [NOTICE](NOTICE).
 The Android Maven badge refers to this fork; the CocoaPods badge still refers to

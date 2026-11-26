@@ -5,7 +5,7 @@ on:
       version:
         description: Desktop version (must match desktop/electron/package.json)
         required: true
-        default: '1.0.0'
+        default: '1.0.1'
       publish_android:
         description: Also start Maven publishing after the GitHub release
         type: boolean
@@ -83,6 +83,15 @@ jobs:
         run: |
           sudo chown root:root ../dist/electron/linux-unpacked/chrome-sandbox
           sudo chmod 4755 ../dist/electron/linux-unpacked/chrome-sandbox
+          sudo chown root:root electron/node_modules/electron/dist/chrome-sandbox
+          sudo chmod 4755 electron/node_modules/electron/dist/chrome-sandbox
+      - name: Test native clipboard permissions and response body copying
+        run: |
+          if [ "$RUNNER_OS" = Linux ]; then
+            xvfb-run --auto-servernum npm --prefix electron run test:clipboard
+          else
+            npm --prefix electron run test:clipboard
+          fi
       - name: Test packaged application
         run: |
           if [ "$RUNNER_OS" = Linux ]; then
