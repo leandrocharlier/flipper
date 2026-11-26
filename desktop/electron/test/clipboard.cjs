@@ -14,6 +14,23 @@ app.setAppLogsPath(path.join(output, 'logs'));
 app.on('window-all-closed', () => {});
 let window;
 let savedClipboard;
+async function snapshotClipboard() {
+  const items = (await clipboard.read()).filter(
+    (item) => item.types.length > 0,
+  );
+  return Promise.all(
+    items.map(
+      async (item) =>
+        new ClipboardItem(
+          Object.fromEntries(
+            await Promise.all(
+              item.types.map(async (type) => [type, await item.getType(type)]),
+            ),
+          ),
+        ),
+    ),
+  );
+}
 const server = http.createServer((_request, response) => {
   response.writeHead(200, {'Content-Type': 'text/html; charset=utf-8'});
   response.end(
@@ -57,17 +74,13 @@ const timeout = setTimeout(() => {
     'Test window must be focused',
   );
   // Resolve every format before modifying the clipboard (read items may be lazy).
-  savedClipboard = await Promise.all(
-    (await clipboard.read()).map(
-      async (item) =>
-        new ClipboardItem(
-          Object.fromEntries(
-            await Promise.all(
-              item.types.map(async (type) => [type, await item.getType(type)]),
-            ),
-          ),
-        ),
-    ),
+  savedClipboard = await snapshotClipboard();
+  // Fresh CI desktops can return a clipboard item with no MIME types.
+  await clipboard.clear();
+  assert.deepEqual(
+    await snapshotClipboard(),
+    [],
+    'Empty clipboard can be preserved',
   );
   await clipboard.writeText('synthetic clipboard sentinel');
   const body =
@@ -110,7 +123,8 @@ const timeout = setTimeout(() => {
   })
   .finally(async () => {
     try {
-      if (savedClipboard !== undefined) await clipboard.write(savedClipboard);
+      if (savedClipboard?.length) await clipboard.write(savedClipboard);
+      else if (savedClipboard !== undefined) await clipboard.clear();
     } catch (error) {
       console.error('Could not restore clipboard:', error.name);
       process.exitCode = 1;
